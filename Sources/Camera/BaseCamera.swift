@@ -116,8 +116,9 @@ struct CapturedPhotosOverlay: View {
             } label: {
                 Image(systemName: "\(viewModel.capturedImageCount).circle.fill")
                     .symbolRenderingMode(.palette)
-                    .foregroundStyle(Color.black, Color(.systemGroupedBackground))
-                    .opacity(0.6)
+//                    .foregroundStyle(Color.black, Color(.systemGroupedBackground))
+//                    .opacity(0.6)
+                    .foregroundStyle(Color.white, Color(.systemFill))
                     .font(.system(size: 40))
                     .frame(width: 40, height: 40)
                     .padding(.vertical, 20)
