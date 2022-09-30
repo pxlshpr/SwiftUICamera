@@ -20,6 +20,8 @@ public struct Camera: View {
                 .edgesIgnoringSafeArea(.all)
             if isCodeScanner {
                 ScanOverlay()
+            } else {
+                CaptureOverlay()
             }
         }
     }
