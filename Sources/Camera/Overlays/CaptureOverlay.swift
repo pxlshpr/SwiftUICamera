@@ -16,7 +16,7 @@ struct CaptureOverlay: View {
     var captureButton: some View {
         Button {
             Haptics.feedback(style: .rigid)
-            viewModel.animateCapture()
+            viewModel.tappedCapture()
 
             NotificationCenter.default.post(name: Notification.Name("didTapCaptureButton"), object: nil)
         } label: {
@@ -25,21 +25,5 @@ struct CaptureOverlay: View {
                 .foregroundColor(.white)
         }
         .buttonStyle(.borderless)
-    }
-}
-
-extension ViewModel {
-    func animateCapture() {
-        withAnimation(.easeInOut(duration: 0.4)) {
-            animateCameraViewShrinking = true
-            makeCameraViewTranslucent = true
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.animateCameraViewShrinking = false
-            withAnimation(.easeInOut(duration: 0.2)) {
-                self.makeCameraViewTranslucent = false
-            }
-        }
     }
 }
