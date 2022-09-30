@@ -19,14 +19,14 @@ struct ScanOverlay: View {
                 Group {
                     LinearGradient(gradient: Gradient(colors: [Color.accentColor.opacity(0.0), .accentColor, Color.accentColor.opacity(0.0)]), startPoint: .top, endPoint: .bottom)
                         .position(x: proxy.size.width/2.0, y: lineY)
-                        .frame(width: proxy.size.width, height: 50)
+                        .frame(width: proxy.size.width, height: 30)
                 }
                 .animation(Animation.easeInOut(duration: animationSingleRunTime).repeatForever(autoreverses: true), value: lineY)
                 .onAppear {
                     lineY = lineY == 0 ? proxy.size.height : 0
                 }
             }
-            barcodeButtonLayer
+//            barcodeButtonLayer
         }
     }
     
