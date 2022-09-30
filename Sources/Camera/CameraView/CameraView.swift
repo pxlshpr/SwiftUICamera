@@ -6,9 +6,9 @@ public struct CameraView: UIViewControllerRepresentable {
 
     public let codeTypes: [AVMetadataObject.ObjectType]
     public var simulatedData = ""
-    public var completion: ((Result<String, Camera.ScanError>) -> Void)? = nil
+    public var completion: ScanResultHandler? = nil
     
-    public init(codeTypes: [AVMetadataObject.ObjectType], simulatedData: String = "", completion: ((Result<String, Camera.ScanError>) -> Void)? = nil) {
+    public init(codeTypes: [AVMetadataObject.ObjectType], simulatedData: String = "", completion: ScanResultHandler? = nil) {
         self.codeTypes = codeTypes
         self.simulatedData = simulatedData
         self.completion = completion
