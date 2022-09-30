@@ -10,7 +10,7 @@ struct PhotoPickerOverlay: View {
             Spacer()
             HStack {
                 button
-                    .padding(.trailing)
+                    .padding(.leading)
                 Spacer()
             }
         }
