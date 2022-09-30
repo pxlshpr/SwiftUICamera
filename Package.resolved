@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "swifthaptics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftHaptics",
+      "state" : {
+        "revision" : "47ed14412dcd109f124cb7b3b88e3fc8f60569e7",
+        "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "swiftsugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftSugar",
+      "state" : {
+        "revision" : "b7add1ec5deea79b13c735576c3b0c92839dc5a6",
+        "version" : "0.0.54"
+      }
+    },
+    {
+      "identity" : "swiftuisugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftUISugar",
+      "state" : {
+        "revision" : "e0222ce74a9b3b549e02076b2552af282300ae3e",
+        "version" : "0.0.169"
+      }
+    }
+  ],
+  "version" : 2
+}
