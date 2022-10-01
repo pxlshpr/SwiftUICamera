@@ -4,7 +4,8 @@ import SwiftUISugar
 
 #if targetEnvironment(simulator)
 extension CameraView {
-    public class CameraViewController: UIViewController,UIImagePickerControllerDelegate,UINavigationControllerDelegate{
+    public class CameraViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+        var config: CameraConfiguration = CameraConfiguration()
         var delegate: Coordinator?
     }
 }
