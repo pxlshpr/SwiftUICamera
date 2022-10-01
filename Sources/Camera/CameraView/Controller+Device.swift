@@ -14,6 +14,13 @@ extension CameraView {
     }
 }
 
+struct CameraType {
+    
+}
+struct CameraParameters {
+    let deviceType: AVCaptureDevice.DeviceType
+}
+
 extension CameraView.Controller {
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -32,16 +39,21 @@ extension CameraView.Controller {
         view.backgroundColor = UIColor.black
         captureSession = AVCaptureSession()
         
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
+        guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else { return }
         let videoInput: AVCaptureDeviceInput
         
         do {
             videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
             // Get an instance of the AVCaptureDeviceInput class using the previous device object.
             //        let input = try AVCaptureDeviceInput(device: captureDevice)
-            
+
+//            if videoCaptureDevice.is {
+//                
+//            }
+
             // Set the input device on the capture session.
             captureSession.addInput(videoInput)
+            
             
             if false {
                 // Initialize a AVCaptureMetadataOutput object and set it as the output device to the capture session.
