@@ -84,14 +84,18 @@ extension CameraView.Controller {
     }
     
     //MARK: - Session
-    func createNewSession(for config: CameraConfiguration) {
-        stopCaptureSession()
-        setupCamera(for: config)
+    func configUpdated(with config: CameraConfiguration) {
+        self.config = config
+        
+        if config.deviceType != config.deviceType
+            || config.position != config.position
+        {
+            stopCaptureSession()
+            setupCamera(for: config)
+        }
     }
 
     func setupCaptureSession(for config: CameraConfiguration) throws {
-        self.config = config
-        
         captureSession = AVCaptureSession()
         let input = try input(for: config)
         captureSession.addInput(input)
@@ -195,7 +199,9 @@ extension CameraView.Controller {
         guard let delegate else {
             fatalError("No delegate")
         }
-        photoOutput.capturePhoto(with: AVCapturePhotoSettings(), delegate: delegate)
+        let settings = AVCapturePhotoSettings()
+        settings.flashMode = config.flashMode
+        photoOutput.capturePhoto(with: settings, delegate: delegate)
     }
 
     @objc func updateOrientation() {

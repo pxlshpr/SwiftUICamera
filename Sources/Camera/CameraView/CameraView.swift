@@ -28,7 +28,7 @@ public struct CameraView: UIViewControllerRepresentable {
     
     public func updateUIViewController(_ controller: Controller, context: Context) {
         if config != controller.config {
-            controller.createNewSession(for: config)
+            controller.configUpdated(with: config)
         }
     }
 }

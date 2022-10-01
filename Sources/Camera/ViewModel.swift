@@ -13,7 +13,6 @@ class ViewModel: ObservableObject {
     @Published var animateCameraViewShrinking = false
     @Published var makeCameraViewTranslucent = false
     
-    @Published var flashMode: AVCaptureDevice.FlashMode = .off
     @Published var torchMode: AVCaptureDevice.TorchMode = .off {
         didSet {
             setDeviceTorchMode(to: torchMode)
@@ -49,12 +48,12 @@ class ViewModel: ObservableObject {
     func tappedFlashButton() {
         Haptics.feedback(style: .medium)
         withAnimation(.interactiveSpring()) {
-            if flashMode.isSelected {
-                flashMode = .off
+            if config.flashMode.isSelected {
+                config.flashMode = .off
             } else {
-                if flashMode == .off {
+                if config.flashMode == .off {
                     //TODO: Set this to the last selection the user made
-                    flashMode = .auto
+                    config.flashMode = .auto
                 }
             }
         }

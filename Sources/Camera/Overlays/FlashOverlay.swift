@@ -21,26 +21,26 @@ struct FlashOverlay: View {
             Button("On") {
                 Haptics.feedback(style: .medium)
                 withAnimation {
-                    viewModel.flashMode = .on
+                    viewModel.config.flashMode = .on
                 }
             }
             Button("Off") {
                 Haptics.feedback(style: .medium)
                 withAnimation {
-                    viewModel.flashMode = .off
+                    viewModel.config.flashMode = .off
                 }
             }
             Button("Auto") {
                 Haptics.feedback(style: .medium)
                 withAnimation {
-                    viewModel.flashMode = .auto
+                    viewModel.config.flashMode = .auto
                 }
             }
         } label: {
             CameraButtonLabel(
-                systemImage: $viewModel.flashMode.systemImage,
-                backgroundColor: $viewModel.flashMode.backgroundColor,
-                isSelected: $viewModel.flashMode.isSelected)
+                systemImage: $viewModel.config.flashMode.systemImage,
+                backgroundColor: $viewModel.config.flashMode.backgroundColor,
+                isSelected: $viewModel.config.flashMode.isSelected)
             .padding(.top, 20)
             .padding(.leading, 9)
             .padding(.trailing, 40)
