@@ -35,6 +35,9 @@ extension CameraView.CameraViewController {
             stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
+    
+    func configUpdated(with config: CameraConfiguration) {
+    }
 }
 
 #endif
