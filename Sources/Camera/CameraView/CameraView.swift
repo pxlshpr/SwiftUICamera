@@ -20,13 +20,13 @@ public struct CameraView: UIViewControllerRepresentable {
         return Coordinator(parent: self)
     }
     
-    public func makeUIViewController(context: Context) -> Controller {
-        let viewController = Controller(config: $config.wrappedValue)
+    public func makeUIViewController(context: Context) -> CameraViewController {
+        let viewController = CameraViewController(config: $config.wrappedValue)
         viewController.delegate = context.coordinator
         return viewController
     }
     
-    public func updateUIViewController(_ controller: Controller, context: Context) {
+    public func updateUIViewController(_ controller: CameraViewController, context: Context) {
         if config != controller.config {
             controller.configUpdated(with: config)
         }

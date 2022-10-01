@@ -4,7 +4,7 @@ import SwiftUISugar
 
 #if !targetEnvironment(simulator)
 extension CameraView {
-    public class Controller: UIViewController {
+    public class CameraViewController: UIViewController {
         var captureSession: AVCaptureSession!
         var previewLayer: AVCaptureVideoPreviewLayer!
         
@@ -25,7 +25,7 @@ extension CameraView {
     }
 }
 
-extension CameraView.Controller {
+extension CameraView.CameraViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
