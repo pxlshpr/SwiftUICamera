@@ -5,8 +5,18 @@ import SwiftUISugar
 #if targetEnvironment(simulator)
 extension CameraView {
     public class CameraViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
-        var config: CameraConfiguration = CameraConfiguration()
+        var config: CameraConfiguration
         var delegate: Coordinator?
+        
+        init(config: CameraConfiguration = CameraConfiguration(), delegate: Coordinator? = nil) {
+            self.config = config
+            self.delegate = delegate
+            super.init(nibName: nil, bundle: nil)
+        }
+        
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
     }
 }
 
