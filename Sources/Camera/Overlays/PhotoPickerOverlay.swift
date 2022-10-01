@@ -23,7 +23,7 @@ struct PhotoPickerOverlay: View {
             CameraButtonLabel(
                 systemImage: .constant("photo.fill.on.rectangle.fill"),
                 isSelected: .constant(false))
-            .padding(.vertical, 20)
+            .padding(.bottom, 20)
             .padding(.leading, 9)
             .padding(.trailing, 40)
             .background(Color.clear)

@@ -23,7 +23,7 @@ struct TorchOverlay: View {
             CameraButtonLabel(
                 systemImage: $viewModel.torchMode.systemImage,
                 isSelected: $viewModel.torchMode.isSelected)
-            .padding(.vertical, 20)
+            .padding(.top, 20)
             .padding(.leading, 40)
             .padding(.trailing, 9)
             .background(Color.clear)

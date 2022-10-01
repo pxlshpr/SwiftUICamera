@@ -41,7 +41,7 @@ struct FlashOverlay: View {
                 systemImage: $viewModel.flashMode.systemImage,
                 backgroundColor: $viewModel.flashMode.backgroundColor,
                 isSelected: $viewModel.flashMode.isSelected)
-            .padding(.vertical, 20)
+            .padding(.top, 20)
             .padding(.leading, 9)
             .padding(.trailing, 40)
             .background(Color.clear)

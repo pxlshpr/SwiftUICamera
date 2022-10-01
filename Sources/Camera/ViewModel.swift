@@ -19,6 +19,8 @@ class ViewModel: ObservableObject {
             setDeviceTorchMode(to: torchMode)
         }
     }
+
+    @Published var config: CameraConfiguration = CameraConfiguration()
     
     @Published var shouldDismiss: Bool = false
 

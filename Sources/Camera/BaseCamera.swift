@@ -49,6 +49,8 @@ public struct BaseCamera: View {
                 PhotoPickerOverlay()
                     .environmentObject(viewModel)
             }
+//            ConfigOverlay()
+//                .environmentObject(viewModel)
         }
         .onReceive(didReceiveCapturedImage, perform: didReceiveCapturedImage)
         .onReceive(couldNotCaptureImage, perform: couldNotCaptureImage)
@@ -56,6 +58,7 @@ public struct BaseCamera: View {
     
     var cameraView: some View {
         CameraView(
+            config: $viewModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
             completion: didScanCode
@@ -89,48 +92,6 @@ public struct BaseCamera: View {
         print(error.localizedDescription)
     }
 }
-
-import SwiftUI
-import SwiftHaptics
-
-struct CapturedPhotosOverlay: View {
-    
-    @EnvironmentObject var viewModel: ViewModel
-    
-    var body: some View {
-        VStack {
-            Spacer()
-            HStack {
-                Spacer()
-                button
-                    .padding(.trailing)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    var button: some View {
-        if viewModel.capturedImageCount > 0 {
-            Button {
-                viewModel.tappedCapturedPhotos()
-            } label: {
-                Image(systemName: "\(viewModel.capturedImageCount).circle.fill")
-                    .symbolRenderingMode(.palette)
-//                    .foregroundStyle(Color.black, Color(.systemGroupedBackground))
-//                    .opacity(0.6)
-                    .foregroundStyle(Color.white, Color(.systemFill))
-                    .font(.system(size: 40))
-                    .frame(width: 40, height: 40)
-                    .padding(.vertical, 20)
-                    .padding(.leading, 40)
-                    .padding(.trailing, 9)
-                    .background(Color.clear)
-                    .contentShape(Rectangle())
-            }
-        }
-    }
-}
-
 
 struct CameraPreview: View {
     

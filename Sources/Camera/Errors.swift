@@ -6,3 +6,7 @@ public extension Camera {
     }
 }
 
+enum CameraError: Error {
+    case couldNotCreateDevice
+}
+
