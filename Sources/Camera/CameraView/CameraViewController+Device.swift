@@ -97,7 +97,6 @@ extension CameraView.CameraViewController {
 
     func setupCaptureSession(for config: CameraConfiguration) throws {
         captureSession = AVCaptureSession()
-        captureSession.beginConfiguration()
         
         let input = try input(for: config)
         captureSession.addInput(input)
