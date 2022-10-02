@@ -21,8 +21,8 @@ struct TorchOverlay: View {
             viewModel.tappedTorchButton()
         } label: {
             CameraButtonLabel(
-                systemImage: $viewModel.torchMode.systemImage,
-                isSelected: $viewModel.torchMode.isSelected)
+                systemImage: $viewModel.config.torchMode.systemImage,
+                isSelected: $viewModel.config.torchMode.isSelected)
             .padding(.top, 20)
             .padding(.leading, 40)
             .padding(.trailing, 9)

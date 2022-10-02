@@ -84,16 +84,33 @@ extension CameraView.CameraViewController {
     }
     
     //MARK: - Session
-    func configUpdated(with config: CameraConfiguration) {
-        self.config = config
-        
-        if config.deviceType != config.deviceType
-            || config.position != config.position
+    func configUpdated(with newConfig: CameraConfiguration) {
+        if newConfig.deviceType != config.deviceType
+            || newConfig.position != config.position
         {
             stopCaptureSession()
-            setupCamera(for: config)
+            setupCamera(for: newConfig)
+        }
+        
+        if newConfig.torchMode != config.torchMode {
+            setDeviceTorchMode(to: newConfig.torchMode)
+        }
+        self.config = newConfig
+    }
+    
+    func setDeviceTorchMode(to torchMode: AVCaptureDevice.TorchMode) {
+        guard let device = device(for: config), device.hasTorch else {
+            return
+        }
+        do {
+            try device.lockForConfiguration()
+            device.torchMode = torchMode
+            device.unlockForConfiguration()
+        } catch {
+            print(error)
         }
     }
+
 
     func setupCaptureSession(for config: CameraConfiguration) throws {
         captureSession = AVCaptureSession()
@@ -110,23 +127,53 @@ extension CameraView.CameraViewController {
     }
 
     func device(for config: CameraConfiguration) -> AVCaptureDevice? {
+//        AVCaptureDevice.default(for: .video)
         AVCaptureDevice.default(config.deviceType, for: .video, position: config.position) ?? .defaultCamera
     }
     
     func input(for config: CameraConfiguration) throws -> AVCaptureDeviceInput {
         guard let device = device(for: config) else {
+//        guard let device = AVCaptureDevice.default(for: .video) else {
             throw CameraError.couldNotCreateDevice
         }
         
-        if device.isFocusModeSupported(.continuousAutoFocus) {
+        if device.isFocusModeSupported(.autoFocus) {
             try! device.lockForConfiguration()
-            device.focusMode = .continuousAutoFocus
+            device.focusMode = .autoFocus
+            
+            device.isSubjectAreaChangeMonitoringEnabled = true
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(subjectAreaDidChange),
+                                                   name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange,
+                                                   object: nil)
+
             device.unlockForConfiguration()
         }
-        
+                
         let input: AVCaptureDeviceInput
         input = try AVCaptureDeviceInput(device: device)
         return input
+    }
+    
+    /**
+     We're doing what was [described here](https://stackoverflow.com/a/41548328).
+     Initially setting to `autoFocus`.
+     Then observing for the `AVCaptureDeviceSubjectAreaDidChange` notification, and setting the focus to `continuousAutoFocus` once that happens.
+     Additionally, recognizing taps and switching back to `autoFocus` when that is triggered.
+     */
+    @objc func subjectAreaDidChange(notification: Notification) {
+//        print("🤳 subjectAreaDidChange: changing to continuous autofocus")
+        changeFocusMode(to: .continuousAutoFocus)
+    }
+    
+    func changeFocusMode(to focusMode: AVCaptureDevice.FocusMode) {
+        guard let device = device(for: config), device.isFocusModeSupported(focusMode) else {
+            return
+        }
+        
+        try! device.lockForConfiguration()
+        device.focusMode = focusMode
+        device.unlockForConfiguration()
     }
     
     var metadataOutput: AVCaptureMetadataOutput {
@@ -192,6 +239,15 @@ extension CameraView.CameraViewController {
         previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
         previewLayer?.frame = view.layer.bounds
         view.layer.addSublayer(previewLayer!)
+        
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
+        view.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    @objc func didTapPreview(gesture: UITapGestureRecognizer) {
+//        print("👆🏽 We got a tap, changing to autoFocus")
+        changeFocusMode(to: .autoFocus)
+
     }
     
     //MARK: - Actions

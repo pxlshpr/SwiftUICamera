@@ -13,12 +13,6 @@ class ViewModel: ObservableObject {
     @Published var animateCameraViewShrinking = false
     @Published var makeCameraViewTranslucent = false
     
-    @Published var torchMode: AVCaptureDevice.TorchMode = .off {
-        didSet {
-            setDeviceTorchMode(to: torchMode)
-        }
-    }
-
     @Published var config: CameraConfiguration = CameraConfiguration()
     
     @Published var shouldDismiss: Bool = false
@@ -62,12 +56,12 @@ class ViewModel: ObservableObject {
     func tappedTorchButton() {
         Haptics.feedback(style: .medium)
         withAnimation(.interactiveSpring()) {
-            if torchMode.isSelected {
-                torchMode = .off
+            if config.torchMode.isSelected {
+                config.torchMode = .off
             } else {
-                if torchMode == .off {
+                if config.torchMode == .off {
                     //TODO: Set this to the last selection the user made
-                    torchMode = .on
+                    config.torchMode = .on
                 }
             }
         }
@@ -75,19 +69,6 @@ class ViewModel: ObservableObject {
     
     func tappedCapturedPhotos() {
         shouldDismiss = true
-    }
-    
-    func setDeviceTorchMode(to torchMode: AVCaptureDevice.TorchMode) {
-        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else {
-            return
-        }
-        do {
-            try device.lockForConfiguration()
-            device.torchMode = torchMode
-            device.unlockForConfiguration()
-        } catch {
-            print(error)
-        }
     }
 }
 
