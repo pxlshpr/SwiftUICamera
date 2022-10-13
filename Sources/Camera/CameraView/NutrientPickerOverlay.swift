@@ -7,7 +7,8 @@ public struct NutrientPicker: View {
     @State var goingUpAgain = false
 
     @Binding var queuedAttributes: [QueueAttribute]
-
+    @Binding var didConfirmAllAttributes: Bool
+    
     var container: some View {
         ZStack(alignment: .bottom) {
             rows
@@ -44,8 +45,8 @@ public struct NutrientPicker: View {
 //        ("Fat", ["25 g"]),
 //    ]
 
-    let height: CGFloat = 60
-    let containerHeight: CGFloat = 100
+    let height: CGFloat = 80
+    let containerHeight: CGFloat = 200
     
     var rows: some View {
         LazyVStack(spacing: 0) {
@@ -106,9 +107,12 @@ public struct NutrientPicker: View {
                 HStack {
                     ForEach(queuedAttribute.values, id: \.self) { value in
                         Button {
-                            Haptics.successFeedback()
+                            Haptics.feedback(style: .rigid)
                             withAnimation {
                                 currentIndex += 1
+                            }
+                            if currentIndex == queuedAttributes.count {
+                                didConfirmAllAttributes = true
                             }
                         } label: {
                             Text(value.description)

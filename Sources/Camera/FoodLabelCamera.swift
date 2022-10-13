@@ -47,12 +47,16 @@ extension FoodLabelCamera {
                 continue
             }
             if let index = queuedAttributes.firstIndex(where: { $0.attribute == row.attribute }) {
-                queuedAttributes[index].update(with: row)
+                withAnimation {
+                    queuedAttributes[index].update(with: row)
+                }
             } else {
                 guard let queueAttribute = QueueAttribute(row: row) else {
                     continue
                 }
-                queuedAttributes.append(queueAttribute)
+                withAnimation {
+                    queuedAttributes.append(queueAttribute)
+                }
             }
         }
         return false
@@ -75,6 +79,8 @@ public struct FoodLabelCamera: View {
 
     @State var queuedAttributes: [QueueAttribute] = []
     @State var confirmedAttributes: [ConfirmedAttribute] = []
+
+    @State var didConfirmAllAttributes: Bool = false
 
     public init(
         image: Binding<UIImage?>,
@@ -109,10 +115,16 @@ public struct FoodLabelCamera: View {
                     .offset(y: 54)
                     .edgesIgnoringSafeArea(.bottom)
             }
-            NutrientPicker(queuedAttributes: $queuedAttributes)
+            NutrientPicker(queuedAttributes: $queuedAttributes, didConfirmAllAttributes: $didConfirmAllAttributes)
         }
         .onChange(of: viewModel.shouldDismiss) { newValue in
             if newValue {
+                dismiss()
+            }
+        }
+        .onChange(of: didConfirmAllAttributes) { newValue in
+            if newValue {
+                Haptics.successFeedback()
                 dismiss()
             }
         }
