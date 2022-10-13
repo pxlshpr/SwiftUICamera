@@ -107,12 +107,12 @@ public struct FoodLabelCamera: View {
                         .inner(color: .black, radius: 3)
                     )
                 )
-                .opacity(0.3)
+                .opacity(0.0)
                 .frame(width: boundingBox.rectForSize(size).width,
                        height: boundingBox.rectForSize(size).height)
             
                 .overlay(
-                    ActivityIndicatorView(isVisible: .constant(true), type: .arcs())
+                    ActivityIndicatorView(isVisible: .constant(true), type: .arcs(count: 5, lineWidth: 5))
                         .frame(width: 50, height: 50)
 //                        .frame(width: boundingBox.rectForSize(size).width, height: boundingBox.rectForSize(size).height)
                         .foregroundColor(.accentColor)
@@ -145,10 +145,10 @@ public struct FoodLabelCamera: View {
                 boundingBox = bestCandidate.scanResult.boundingBox
             }
             if !haveBestCandidate {
-                withAnimation {
-                    haveBestCandidate = true
-                }
-                return true
+//                withAnimation {
+//                    haveBestCandidate = true
+//                }
+//                return true
             }
         } else {
             guard scanResult.boundingBox != .zero else { return false }
@@ -187,6 +187,16 @@ class ScanResultSet: ObservableObject {
     }
 }
 
+var mostFrequentAmounts: [Attribute: Double] = [:]
+
+func commonElementsInArrayUsingReduce(doublesArray: [Double]) -> (Double, Int) {
+    let doublesArray = doublesArray.reduce(into: [:]) { (counts, doubles) in
+        counts[doubles, default: 0] += 1
+    }
+    let element = doublesArray.sorted(by: {$0.value > $1.value}).first
+    return (element?.key ?? 0, element?.value ?? 0)
+}
+
 extension Array where Element == ScanResultSet {
     var sortedByNutrientsCount: [ScanResultSet] {
         sorted(by: { $0.scanResult.nutrientsCount > $1.scanResult.nutrientsCount })
@@ -199,15 +209,30 @@ extension Array where Element == ScanResultSet {
         }
         
         /// filter out only the results that has the same nutrient count as the one with the most
-        let filtered = filter({ $0.scanResult.nutrientsCount == withMostNutrients.scanResult.nutrientsCount })
-        
-        var mostFrequentAmounts: [Attribute: Double] = [:]
+//        let filtered = filter({ $0.scanResult.nutrientsCount == withMostNutrients.scanResult.nutrientsCount })
+        let filtered = self
         
         /// for each nutrient, save the modal value across all these filtered results
         for attribute in withMostNutrients.scanResult.nutrientAttributes {
+            
+//            print("Getting doubles for \(attribute) in \(self.count)")
+            
             let doubles = filtered.map({$0.scanResult}).amounts(for: attribute)
-            guard let mostFrequent = doubles.mostFrequent else { continue }
-            mostFrequentAmounts[attribute] = mostFrequent
+            Haptics.transientHaptic()
+            print("🥶 Got \(doubles.count) doubles for \(attribute) \(self.count) array elements")
+
+            let mostFrequentWithCount = commonElementsInArrayUsingReduce(doublesArray: doubles)
+            
+//            guard let mostFrequentWithCount = doubles.mostFrequentWithCount else {
+//                continue
+//            }
+            mostFrequentAmounts[attribute] = mostFrequentWithCount.0
+            print("🥶 Most frequent amounts for \(self.count) is now:")
+            for key in mostFrequentAmounts.keys {
+                print("🥶     \(key): \(mostFrequentAmounts[key] ?? 0) (\(mostFrequentWithCount.1) times)")
+            }
+            print("🥶  -----------------")
+            print("🥶  ")
         }
         
         /// now sort the filtered results by the count of (how many nutrients in it match the modal results) and return the first one
@@ -228,22 +253,23 @@ class ScanResults: ObservableObject {
         guard result.hasNutrients else { return nil }
         
         /// If we have a `ScanResult` that matches this
-        if let index = array.firstIndex(where: { $0.scanResult.matches(result) }) {
-            let existing = array.remove(at: index)
-            
-            /// Replace the scan result with the new one (so we always keep the latest copy)
-            existing.scanResult = result
-            
-            /// Update the date
-            existing.date = Date()
-            
-            /// Increase the count
-            existing.count += 1
-            
-            array.append(existing)
-        } else {
+//        if let index = array.firstIndex(where: { $0.scanResult.matches(result) }) {
+//            let existing = array.remove(at: index)
+//
+//            /// Replace the scan result with the new one (so we always keep the latest copy)
+//            existing.scanResult = result
+//
+//            /// Update the date
+//            existing.date = Date()
+//
+//            /// Increase the count
+//            existing.count += 1
+//
+//            array.append(existing)
+//        } else {
             array.append(ScanResultSet(scanResult: result, image: nil))
-        }
+        print("🥶 Array now has \(array.count)")
+//        }
         return bestCandidate
     }
     
