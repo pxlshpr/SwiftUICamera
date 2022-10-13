@@ -3,6 +3,7 @@ import AVKit
 import SwiftHaptics
 import FoodLabelScanner
 import VisionSugar
+import ActivityIndicatorView
 
 public struct FoodLabelCamera: View {
     
@@ -13,8 +14,14 @@ public struct FoodLabelCamera: View {
     
     let scanResults = ScanResults()
     @State var boundingBox: CGRect? = nil
+    @State var haveBestCandidate = false
     
+    @Binding var image: UIImage?
+    @Binding var scanResult: ScanResult?
+
     public init(
+        image: Binding<UIImage?>,
+        scanResult: Binding<ScanResult?>,
         showFlashButton: Bool = true,
         showTorchButton: Bool = false,
         showPhotosPickerButton: Bool = false,
@@ -22,6 +29,8 @@ public struct FoodLabelCamera: View {
         didScanFoodLabel: ((ScanResult) -> ())? = nil,
         didCaptureImage: CapturedImageHandler? = nil
     ) {
+        _image = image
+        _scanResult = scanResult
         self.didCaptureImage = didCaptureImage
         self.didScanFoodLabelHandler = didScanFoodLabel
         
@@ -66,7 +75,11 @@ public struct FoodLabelCamera: View {
     var boxesLayer: some View {
         if let boundingBox {
             GeometryReader { geometry in
-                boxLayer(boundingBox: boundingBox, inSize: geometry.size, color: .accentColor)
+                boxLayer(
+                    boundingBox: boundingBox,
+                    inSize: geometry.size,
+                    color: haveBestCandidate ? .green : Color(.label)
+                )
             }
         }
     }
@@ -99,9 +112,13 @@ public struct FoodLabelCamera: View {
                        height: boundingBox.rectForSize(size).height)
             
                 .overlay(
-                    RoundedRectangle(cornerRadius: 3)
-                        .stroke(color, lineWidth: 1)
-                        .opacity(0.8)
+                    ActivityIndicatorView(isVisible: .constant(true), type: .arcs())
+                        .frame(width: 50, height: 50)
+//                        .frame(width: boundingBox.rectForSize(size).width, height: boundingBox.rectForSize(size).height)
+                        .foregroundColor(.accentColor)
+//                    RoundedRectangle(cornerRadius: 3)
+//                        .stroke(color, lineWidth: 1)
+//                        .opacity(0.8)
                 )
                 .shadow(radius: 3, x: 0, y: 2)
         }
@@ -122,12 +139,23 @@ public struct FoodLabelCamera: View {
     
     func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
         if let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult) {
-//            print(bestCandidate.summaryDescription(withEmojiPrefix: "🥳`"))
-            print("🥳 Best candidate box: \(bestCandidate.boundingBox)")
-            boundingBox = bestCandidate.boundingBox
+            print("🥳 Best candidate, count: \(bestCandidate.count)")
+            print(bestCandidate.scanResult.summaryDescription(withEmojiPrefix: "🥳`"))
+            withAnimation {
+                boundingBox = bestCandidate.scanResult.boundingBox
+            }
+            if !haveBestCandidate {
+                withAnimation {
+                    haveBestCandidate = true
+                }
+                return true
+            }
         } else {
-            print("🥳 starting box: \(boundingBox)")
-            boundingBox = scanResult.boundingBox
+            guard scanResult.boundingBox != .zero else { return false }
+            print("🥳 starting box: \(scanResult.boundingBox)")
+            withAnimation {
+                boundingBox = scanResult.boundingBox
+            }
         }
         
         return false
@@ -135,17 +163,27 @@ public struct FoodLabelCamera: View {
     
     func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
         scanResults.set(image, for: scanResult)
+        self.image = image
+        self.scanResult = scanResult
+        
+        Haptics.successFeedback()
+        dismiss()
     }
     
 }
 
 class ScanResultSet: ObservableObject {
-    let scanResult: ScanResult
-    let date: Date = Date()
+    var scanResult: ScanResult
+    var date: Date = Date()
     var image: UIImage?
+    
+    /// How many times this has been repeated
+    var count: Int
+    
     init(scanResult: ScanResult, image: UIImage? = nil) {
         self.scanResult = scanResult
         self.image = image
+        self.count = 0
     }
 }
 
@@ -154,7 +192,7 @@ extension Array where Element == ScanResultSet {
         sorted(by: { $0.scanResult.nutrientsCount > $1.scanResult.nutrientsCount })
     }
     
-    var bestCandidate: ScanResult? {
+    var bestCandidate: ScanResultSet? {
         guard count >= 3, let withMostNutrients = sortedByNutrientsCount.first
         else {
             return nil
@@ -176,22 +214,40 @@ extension Array where Element == ScanResultSet {
         let sorted = filtered
             .sortedByMostMatchesToAmountsDict(mostFrequentAmounts)
             .sorted { $0.date > $1.date }
+            .sorted { $0.count > $1.count }
         
         /// return the one with the most matches
-        return sorted.first?.scanResult
+        return sorted.first
     }
 }
 
 class ScanResults: ObservableObject {
     var array: [ScanResultSet] = []
         
-    func bestCandidateAfterAdding(result: ScanResult) -> ScanResult? {
+    func bestCandidateAfterAdding(result: ScanResult) -> ScanResultSet? {
         guard result.hasNutrients else { return nil }
-        array.append(ScanResultSet(scanResult: result, image: nil))
+        
+        /// If we have a `ScanResult` that matches this
+        if let index = array.firstIndex(where: { $0.scanResult.matches(result) }) {
+            let existing = array.remove(at: index)
+            
+            /// Replace the scan result with the new one (so we always keep the latest copy)
+            existing.scanResult = result
+            
+            /// Update the date
+            existing.date = Date()
+            
+            /// Increase the count
+            existing.count += 1
+            
+            array.append(existing)
+        } else {
+            array.append(ScanResultSet(scanResult: result, image: nil))
+        }
         return bestCandidate
     }
     
-    var bestCandidate: ScanResult? {
+    var bestCandidate: ScanResultSet? {
         array.bestCandidate
     }
     

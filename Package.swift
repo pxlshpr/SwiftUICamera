@@ -19,7 +19,9 @@ let package = Package(
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.0"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.172"),
         .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.56"),
-        .package(url: "https://github.com/pxlshpr/FoodLabelScanner", from: "0.0.48"),
+        .package(url: "https://github.com/pxlshpr/FoodLabelScanner", from: "0.0.49"),
+        .package(url: "https://github.com/pxlshpr/FoodLabel", from: "0.0.23"),
+        .package(url: "https://github.com/exyte/ActivityIndicatorView", from: "1.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -31,6 +33,8 @@ let package = Package(
                 .product(name: "SwiftUISugar", package: "swiftuisugar"),
                 .product(name: "VisionSugar", package: "visionsugar"),
                 .product(name: "FoodLabelScanner", package: "foodlabelscanner"),
+                .product(name: "ActivityIndicatorView", package: "activityindicatorview"),
+                .product(name: "FoodLabel", package: "foodlabel"),
             ]),
         .testTarget(
             name: "CameraTests",
