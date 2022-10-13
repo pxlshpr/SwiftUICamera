@@ -1,18 +1,29 @@
 import AVFoundation
 import SwiftUI
 import SwiftUISugar
+import FoodLabelScanner
 
 public struct CameraView: UIViewControllerRepresentable {
 
     public let codeTypes: [AVMetadataObject.ObjectType]
     public var simulatedData = ""
+    
     public var completion: ScannedCodeHandler? = nil
+    let scanResultHandler: ((ScanResult) -> ())?
+
     @Binding var config: CameraConfiguration
     
-    public init(config: Binding<CameraConfiguration>, codeTypes: [AVMetadataObject.ObjectType], simulatedData: String = "", completion: ScannedCodeHandler? = nil) {
+    public init(
+        config: Binding<CameraConfiguration>,
+        codeTypes: [AVMetadataObject.ObjectType],
+        simulatedData: String = "",
+        scanResultHandler: ((ScanResult) -> ())? = nil,
+        completion: ScannedCodeHandler? = nil
+    ) {
         self.codeTypes = codeTypes
         self.simulatedData = simulatedData
         self.completion = completion
+        self.scanResultHandler = scanResultHandler
         _config = config
     }
     

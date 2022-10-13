@@ -4,7 +4,7 @@ import SwiftUISugar
 
 #if targetEnvironment(simulator)
 extension CameraView {
-    public class CameraViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+    public class CameraViewController_Legacy: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
         var config: CameraConfiguration
         var delegate: Coordinator?
         
@@ -20,7 +20,7 @@ extension CameraView {
     }
 }
 
-extension CameraView.CameraViewController {
+extension CameraView.CameraViewController_Legacy {
     override public func loadView() {
         view = UIView()
         view.isUserInteractionEnabled = true

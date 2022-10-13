@@ -4,7 +4,7 @@ import SwiftUISugar
 
 #if !targetEnvironment(simulator)
 extension CameraView {
-    public class CameraViewController: UIViewController {
+    public class CameraViewController_Legacy: UIViewController {
         var captureSession: AVCaptureSession!
         var previewLayer: AVCaptureVideoPreviewLayer!
         
@@ -25,7 +25,7 @@ extension CameraView {
     }
 }
 
-extension CameraView.CameraViewController {
+extension CameraView.CameraViewController_Legacy {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
@@ -118,6 +118,8 @@ extension CameraView.CameraViewController {
         let input = try input(for: config)
         captureSession.addInput(input)
         
+        let output = AVCaptureVideoDataOutput()
+        //TODO: We were handling barcodes here
         if false {
             captureSession.addOutput(metadataOutput)
         } else {

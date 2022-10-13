@@ -1,6 +1,7 @@
 import SwiftUI
 import AVKit
 import SwiftHaptics
+import FoodLabelScanner
 
 public struct BaseCamera: View {
     
@@ -9,13 +10,15 @@ public struct BaseCamera: View {
 
     let isCodeScanner: Bool
     
+    var didScanFoodLabel: ((ScanResult) -> ())?
     var didScanCode: ScannedCodeHandler?
     var didCaptureImage: CapturedImageHandler?
     
     let didReceiveCapturedImage = NotificationCenter.default.publisher(for: .didCaptureImage)
     let couldNotCaptureImage = NotificationCenter.default.publisher(for: .didNotCaptureImage)
     
-    public init(didCaptureImage: CapturedImageHandler? = nil, didScanCode: ScannedCodeHandler? = nil) {
+    public init(didScanFoodLabel: ((ScanResult) -> ())? = nil, didCaptureImage: CapturedImageHandler? = nil, didScanCode: ScannedCodeHandler? = nil) {
+        self.didScanFoodLabel = didScanFoodLabel
         self.didScanCode = didScanCode
         self.isCodeScanner = didScanCode != nil
         self.didCaptureImage = didCaptureImage
@@ -61,6 +64,7 @@ public struct BaseCamera: View {
             config: $viewModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
+            scanResultHandler: didScanFoodLabel,
             completion: didScanCode
         )
         .scaleEffect(viewModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
