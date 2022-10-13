@@ -12,7 +12,7 @@ public struct FoodLabelCamera: View {
     let didScanFoodLabelHandler: ((ScanResult) -> ())?
     
     let scanResults = ScanResults()
-    @State var latestScanResult: ScanResult? = nil
+    @State var boundingBox: CGRect? = nil
     
     public init(
         showFlashButton: Bool = true,
@@ -64,9 +64,10 @@ public struct FoodLabelCamera: View {
     
     @ViewBuilder
     var boxesLayer: some View {
-        if let latestScanResult {
-            boxesLayer(for: latestScanResult)
-//                .background(.green.opacity(0.5))
+        if let boundingBox {
+            GeometryReader { geometry in
+                boxLayer(boundingBox: boundingBox, inSize: geometry.size, color: .accentColor)
+            }
         }
     }
     
@@ -120,7 +121,16 @@ public struct FoodLabelCamera: View {
     //MARK: - Actions
     
     func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
-        scanResults.shouldGetImageAfterAdding(result: scanResult)
+        if let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult) {
+//            print(bestCandidate.summaryDescription(withEmojiPrefix: "🥳`"))
+            print("🥳 Best candidate box: \(bestCandidate.boundingBox)")
+            boundingBox = bestCandidate.boundingBox
+        } else {
+            print("🥳 starting box: \(boundingBox)")
+            boundingBox = scanResult.boundingBox
+        }
+        
+        return false
     }
     
     func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
@@ -131,6 +141,7 @@ public struct FoodLabelCamera: View {
 
 class ScanResultSet: ObservableObject {
     let scanResult: ScanResult
+    let date: Date = Date()
     var image: UIImage?
     init(scanResult: ScanResult, image: UIImage? = nil) {
         self.scanResult = scanResult
@@ -144,47 +155,40 @@ extension Array where Element == ScanResultSet {
     }
     
     var bestCandidate: ScanResult? {
-        guard count >= 3,
-              let withMostNutrients = sortedByNutrientsCount.first?.scanResult
+        guard count >= 3, let withMostNutrients = sortedByNutrientsCount.first
         else {
             return nil
         }
         
         /// filter out only the results that has the same nutrient count as the one with the most
-        let filtered = filter({ $0.scanResult.nutrientsCount == withMostNutrients.nutrientsCount })
-            .map { $0.scanResult }
+        let filtered = filter({ $0.scanResult.nutrientsCount == withMostNutrients.scanResult.nutrientsCount })
         
         var mostFrequentAmounts: [Attribute: Double] = [:]
         
         /// for each nutrient, save the modal value across all these filtered results
-        for attribute in withMostNutrients.nutrientAttributes {
-            let doubles = filtered.amounts(for: attribute)
+        for attribute in withMostNutrients.scanResult.nutrientAttributes {
+            let doubles = filtered.map({$0.scanResult}).amounts(for: attribute)
             guard let mostFrequent = doubles.mostFrequent else { continue }
             mostFrequentAmounts[attribute] = mostFrequent
         }
         
         /// now sort the filtered results by the count of (how many nutrients in it match the modal results) and return the first one
-        let sorted = filtered.sortedByMostMatchesToAmountsDict(mostFrequentAmounts)
+        let sorted = filtered
+            .sortedByMostMatchesToAmountsDict(mostFrequentAmounts)
+            .sorted { $0.date > $1.date }
         
         /// return the one with the most matches
-        return sorted.first
+        return sorted.first?.scanResult
     }
 }
 
 class ScanResults: ObservableObject {
     var array: [ScanResultSet] = []
         
-    func shouldGetImageAfterAdding(result: ScanResult) -> Bool {
-        guard result.hasNutrients else { return false }
+    func bestCandidateAfterAdding(result: ScanResult) -> ScanResult? {
+        guard result.hasNutrients else { return nil }
         array.append(ScanResultSet(scanResult: result, image: nil))
-        
-        if let bestCandidate {
-            print("🥳 Best candidate:")
-            print(bestCandidate.summaryDescription(withEmojiPrefix: "🥳`"))
-            return false
-        }
-        
-        return false
+        return bestCandidate
     }
     
     var bestCandidate: ScanResult? {

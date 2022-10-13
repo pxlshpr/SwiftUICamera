@@ -2,7 +2,22 @@ import Foundation
 import FoodLabelScanner
 import VisionSugar
 
+extension Array where Element == RecognizedText {
+    var boundingBox: CGRect {
+        guard !isEmpty else { return .zero }
+        return reduce(.null) { partialResult, text in
+            partialResult.union(text.boundingBox)
+        }
+    }
+}
+
 extension ScanResult {
+    
+    var boundingBox: CGRect {
+        allTexts
+            .filter { $0.boundingBox != .zero }
+            .boundingBox
+    }
     
     var nutrientAttributes: [Attribute] {
         nutrients.rows.map({ $0.attribute })
@@ -45,16 +60,18 @@ extension ScanResult {
     
 }
 
+extension Array where Element == ScanResultSet {
+    func sortedByMostMatchesToAmountsDict(_ dict: [Attribute:Double]) -> [ScanResultSet] {
+        sorted(by: {
+            $0.scanResult.countOfHowManyNutrientsMatchAmounts(in: dict)
+            > $1.scanResult.countOfHowManyNutrientsMatchAmounts(in: dict)
+        })
+    }
+}
+
 extension Array where Element == ScanResult {
     func amounts(for attribute: Attribute) -> [Double] {
         compactMap { $0.amount(for: attribute) }
-    }
-    
-    func sortedByMostMatchesToAmountsDict(_ dict: [Attribute:Double]) -> [ScanResult] {
-        sorted(by: {
-            $0.countOfHowManyNutrientsMatchAmounts(in: dict)
-            > $1.countOfHowManyNutrientsMatchAmounts(in: dict)
-        })
     }
 }
 
@@ -99,3 +116,52 @@ extension Array where Element: Hashable {
 //if let result = mostFrequent(array: ["a", "b", "a", "c", "a", "b"]) {
 //    print("\(result.value) occurs \(result.count) times")
 //}
+
+extension ScanResult {
+    var allTexts: [RecognizedText] {
+        servingTexts + headerTexts + nutrientTexts
+    }
+    var servingTexts: [RecognizedText] {
+        [
+            serving?.amountText?.text,
+            serving?.amountText?.attributeText,
+            serving?.unitText?.text,
+            serving?.unitText?.attributeText,
+            serving?.unitNameText?.text,
+            serving?.unitNameText?.attributeText,
+            serving?.equivalentSize?.amountText.text,
+            serving?.equivalentSize?.amountText.attributeText,
+            serving?.equivalentSize?.unitText?.text,
+            serving?.equivalentSize?.unitText?.attributeText,
+            serving?.equivalentSize?.unitNameText?.text,
+            serving?.equivalentSize?.unitNameText?.attributeText,
+            serving?.perContainer?.amountText.text,
+            serving?.perContainer?.amountText.attributeText,
+            serving?.perContainer?.nameText?.text,
+            serving?.perContainer?.nameText?.attributeText,
+        ]
+            .compactMap { $0 }
+    }
+    
+    var headerTexts: [RecognizedText] {
+        [
+            headers?.headerText1?.text,
+            headers?.headerText1?.attributeText,
+            headers?.headerText2?.text,
+            headers?.headerText2?.attributeText
+        ]
+            .compactMap { $0 }
+    }
+    
+    var nutrientTexts: [RecognizedText] {
+        var texts: [RecognizedText?] = []
+        for row in nutrients.rows {
+            texts.append(row.attributeText.text)
+            texts.append(row.valueText1?.text)
+            texts.append(row.valueText1?.attributeText)
+            texts.append(row.valueText2?.text)
+            texts.append(row.valueText2?.attributeText)
+        }
+        return texts.compactMap { $0 }
+    }
+}
