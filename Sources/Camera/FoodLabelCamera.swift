@@ -32,6 +32,7 @@ struct QueueAttribute {
         if let value2 = row.value2, !values.contains(value2) {
             values.append(value2)
         }
+        
     }
 }
 
