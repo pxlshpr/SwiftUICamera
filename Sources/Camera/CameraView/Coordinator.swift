@@ -8,7 +8,8 @@ extension CameraView {
         var parent: CameraView
         var codeFound = false
         
-        var scanTask: Task<ScanResult, Error>? = nil
+        var scanTasks: [Task<ScanResult, Error>] = []
+        var lastScanTime: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
         
         init(parent: CameraView) {
             self.parent = parent
@@ -17,21 +18,26 @@ extension CameraView {
 }
 
 extension CameraView.Coordinator: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    
     public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         Task {
-            guard scanTask == nil else {
-                return
-            }
+            let timeElapsed = CFAbsoluteTimeGetCurrent() - lastScanTime
+            guard timeElapsed > 0.5, scanTasks.count < 3 else { return }
             
-            self.scanTask = Task {
+            lastScanTime = CFAbsoluteTimeGetCurrent()
+//            guard scanTask == nil else { return }
+            let scanTask = Task {
                 let scanResult = try await FoodLabelLiveScanner(sampleBuffer: sampleBuffer).scan()
                 return scanResult
             }
+            scanTasks.append(scanTask)
             
             let start = CFAbsoluteTimeGetCurrent()
-            let scanResult = try await scanTask!.value
+            let scanResult = try await scanTask.value
+            scanTasks.removeAll(where: { $0 == scanTask })
+            
             let duration = (CFAbsoluteTimeGetCurrent()-start).rounded(toPlaces: 2)
-            scanTask = nil
             
             print("🥂 Got result in \(duration)s")
             print(scanResult.summaryDescription(withEmojiPrefix: "🥂"))
@@ -54,6 +60,10 @@ extension CameraView.Coordinator: AVCaptureVideoDataOutputSampleBufferDelegate {
             //            let image = UIImage(ciImage: cameraImage, scale: 1, orientation: .right)
             //            imageForScanResult(image, scanResult)
         }
+    }
+    
+    public func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        print("🥶 dropped frames")
     }
     
     func imageFromSampleBuffer(sampleBuffer : CMSampleBuffer) -> UIImage {

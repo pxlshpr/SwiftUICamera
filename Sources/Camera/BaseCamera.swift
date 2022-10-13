@@ -38,10 +38,11 @@ public struct BaseCamera: View {
                 .edgesIgnoringSafeArea(.all)
             if isCodeScanner {
                 ScanOverlay()
-            } else {
-                CaptureOverlay()
-                    .environmentObject(viewModel)
             }
+//            else {
+//                CaptureOverlay()
+//                    .environmentObject(viewModel)
+//            }
             if viewModel.showFlashButton {
                 FlashOverlay()
                     .environmentObject(viewModel)

@@ -4,6 +4,60 @@ import SwiftHaptics
 import FoodLabelScanner
 import VisionSugar
 import ActivityIndicatorView
+import PrepUnits
+
+struct QueueAttribute {
+    let attribute: Attribute
+    //TODO: Support other types of texts here
+    //TODO: Include images here so we can crop the required bits once the user has tapped on one
+    var values: [FoodLabelValue] = []
+    
+    init?(row: ScanResult.Nutrients.Row) {
+        self.attribute = row.attribute
+        if let value1 = row.value1 {
+            values.append(value1)
+        }
+        if let value2 = row.value2 {
+            values.append(value2)
+        }
+        guard !values.isEmpty else {
+            return nil
+        }
+    }
+    
+    mutating func update(with row: ScanResult.Nutrients.Row) {
+        if let value1 = row.value1, !values.contains(value1) {
+            values.append(value1)
+        }
+        if let value2 = row.value2, !values.contains(value2) {
+            values.append(value2)
+        }
+    }
+}
+
+struct ConfirmedAttribute {
+    let attribute: Attribute
+    var value: FoodLabelValue
+}
+
+extension FoodLabelCamera {
+    func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
+        for row in scanResult.nutrients.rows {
+            guard !confirmedAttributes.contains(where: { $0.attribute == row.attribute }) else {
+                continue
+            }
+            if let index = queuedAttributes.firstIndex(where: { $0.attribute == row.attribute }) {
+                queuedAttributes[index].update(with: row)
+            } else {
+                guard let queueAttribute = QueueAttribute(row: row) else {
+                    continue
+                }
+                queuedAttributes.append(queueAttribute)
+            }
+        }
+        return false
+    }
+}
 
 public struct FoodLabelCamera: View {
     
@@ -19,13 +73,16 @@ public struct FoodLabelCamera: View {
     @Binding var image: UIImage?
     @Binding var scanResult: ScanResult?
 
+    @State var queuedAttributes: [QueueAttribute] = []
+    @State var confirmedAttributes: [ConfirmedAttribute] = []
+
     public init(
         image: Binding<UIImage?>,
         scanResult: Binding<ScanResult?>,
-        showFlashButton: Bool = true,
+        showFlashButton: Bool = false,
         showTorchButton: Bool = false,
         showPhotosPickerButton: Bool = false,
-        showCapturedImagesCount: Bool = true,
+        showCapturedImagesCount: Bool = false,
         didScanFoodLabel: ((ScanResult) -> ())? = nil,
         didCaptureImage: CapturedImageHandler? = nil
     ) {
@@ -52,6 +109,7 @@ public struct FoodLabelCamera: View {
                     .offset(y: 54)
                     .edgesIgnoringSafeArea(.bottom)
             }
+            NutrientPicker(queuedAttributes: $queuedAttributes)
         }
         .onChange(of: viewModel.shouldDismiss) { newValue in
             if newValue {
@@ -107,7 +165,7 @@ public struct FoodLabelCamera: View {
                         .inner(color: .black, radius: 3)
                     )
                 )
-                .opacity(0.0)
+                .opacity(0.4)
                 .frame(width: boundingBox.rectForSize(size).width,
                        height: boundingBox.rectForSize(size).height)
             
@@ -137,7 +195,7 @@ public struct FoodLabelCamera: View {
     
     //MARK: - Actions
     
-    func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
+    func shouldGetImageForScanResult_legacy(_ scanResult: ScanResult) -> Bool {
         if let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult) {
             print("🥳 Best candidate, count: \(bestCandidate.count)")
             print(bestCandidate.scanResult.summaryDescription(withEmojiPrefix: "🥳`"))
@@ -187,7 +245,7 @@ class ScanResultSet: ObservableObject {
     }
 }
 
-var mostFrequentAmounts: [Attribute: Double] = [:]
+var mostFrequentAmounts: [Attribute: (Double, Int)] = [:]
 
 func commonElementsInArrayUsingReduce(doublesArray: [Double]) -> (Double, Int) {
     let doublesArray = doublesArray.reduce(into: [:]) { (counts, doubles) in
@@ -226,10 +284,10 @@ extension Array where Element == ScanResultSet {
 //            guard let mostFrequentWithCount = doubles.mostFrequentWithCount else {
 //                continue
 //            }
-            mostFrequentAmounts[attribute] = mostFrequentWithCount.0
+            mostFrequentAmounts[attribute] = mostFrequentWithCount
             print("🥶 Most frequent amounts for \(self.count) is now:")
             for key in mostFrequentAmounts.keys {
-                print("🥶     \(key): \(mostFrequentAmounts[key] ?? 0) (\(mostFrequentWithCount.1) times)")
+                print("🥶     \(key): \(mostFrequentAmounts[key]?.0 ?? 0) (\(mostFrequentAmounts[key]?.1 ?? 0) times)")
             }
             print("🥶  -----------------")
             print("🥶  ")

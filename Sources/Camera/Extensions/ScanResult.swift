@@ -71,11 +71,11 @@ extension ScanResult {
         nutrients.rows.first(where: { $0.attribute == attribute })?.value1?.amount
     }
     
-    func countOfHowManyNutrientsMatchAmounts(in dict: [Attribute : Double]) -> Int {
+    func countOfHowManyNutrientsMatchAmounts(in dict: [Attribute : (Double, Int)]) -> Int {
         var count = 0
         for attribute in dict.keys {
             guard let amount = amount(for: attribute) else { continue }
-            if amount == dict[attribute] {
+            if amount == dict[attribute]?.0 {
                 count += 1
             }
         }
@@ -85,7 +85,7 @@ extension ScanResult {
 }
 
 extension Array where Element == ScanResultSet {
-    func sortedByMostMatchesToAmountsDict(_ dict: [Attribute:Double]) -> [ScanResultSet] {
+    func sortedByMostMatchesToAmountsDict(_ dict: [Attribute : (Double, Int)]) -> [ScanResultSet] {
         sorted(by: {
             $0.scanResult.countOfHowManyNutrientsMatchAmounts(in: dict)
             > $1.scanResult.countOfHowManyNutrientsMatchAmounts(in: dict)
