@@ -27,15 +27,26 @@ extension CameraView.Coordinator: AVCaptureVideoDataOutputSampleBufferDelegate {
                 let scanResult = try await FoodLabelLiveScanner(sampleBuffer: sampleBuffer).scan()
                 return scanResult
             }
+            
             let start = CFAbsoluteTimeGetCurrent()
             let scanResult = try await scanTask!.value
-            if let handler = parent.scanResultHandler {
-                handler(scanResult)
-            }
             let duration = (CFAbsoluteTimeGetCurrent()-start).rounded(toPlaces: 2)
             scanTask = nil
+            
             print("🥂 Got result in \(duration)s")
             print(scanResult.summaryDescription(withEmojiPrefix: "🥂"))
+
+            guard let shouldGetImageForScanResult = parent.shouldGetImageForScanResult,
+                  shouldGetImageForScanResult(scanResult),
+                  let imageForScanResult = parent.imageForScanResult
+            else {
+                return
+            }
+                    
+            let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+            let cameraImage = CIImage(cvPixelBuffer: imageBuffer!)
+            let image = UIImage(ciImage: cameraImage, scale: 1, orientation: .right)
+            imageForScanResult(image, scanResult)
         }
     }
 }

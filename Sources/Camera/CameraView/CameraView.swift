@@ -9,7 +9,8 @@ public struct CameraView: UIViewControllerRepresentable {
     public var simulatedData = ""
     
     public var completion: ScannedCodeHandler? = nil
-    let scanResultHandler: ((ScanResult) -> ())?
+    let shouldGetImageForScanResult: ((ScanResult) -> (Bool))?
+    let imageForScanResult: ((UIImage, ScanResult) -> ())?
 
     @Binding var config: CameraConfiguration
     
@@ -17,13 +18,15 @@ public struct CameraView: UIViewControllerRepresentable {
         config: Binding<CameraConfiguration>,
         codeTypes: [AVMetadataObject.ObjectType],
         simulatedData: String = "",
-        scanResultHandler: ((ScanResult) -> ())? = nil,
+        shouldGetImageForScanResult: ((ScanResult) -> (Bool))? = nil,
+        imageForScanResult: ((UIImage, ScanResult) -> ())? = nil,
         completion: ScannedCodeHandler? = nil
     ) {
         self.codeTypes = codeTypes
         self.simulatedData = simulatedData
         self.completion = completion
-        self.scanResultHandler = scanResultHandler
+        self.shouldGetImageForScanResult = shouldGetImageForScanResult
+        self.imageForScanResult = imageForScanResult
         _config = config
     }
     

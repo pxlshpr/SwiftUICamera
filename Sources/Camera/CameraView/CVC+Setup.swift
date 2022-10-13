@@ -98,6 +98,7 @@ extension CameraView.CameraViewController {
         
         videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(delegate, queue: .main)
+        photoOutput = AVCapturePhotoOutput()
         captureSession.addOutput(videoOutput)
 //        //TODO: We were handling barcodes here
 //        if false {
@@ -218,7 +219,7 @@ extension CameraView.CameraViewController {
     func setupView() {
         view.backgroundColor = UIColor.black
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
 //        previewLayer?.videoGravity = AVLayerVideoGravity.resize
         previewLayer?.frame = view.layer.bounds
         view.layer.addSublayer(previewLayer!)

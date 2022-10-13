@@ -11,6 +11,7 @@ public struct FoodLabelCamera: View {
     let didCaptureImage: CapturedImageHandler?
     let didScanFoodLabelHandler: ((ScanResult) -> ())?
     
+    let scanResults = ScanResults()
     @State var latestScanResult: ScanResult? = nil
     
     public init(
@@ -38,6 +39,8 @@ public struct FoodLabelCamera: View {
             cameraLayer
             GeometryReader { geometry in
                 boxesLayer
+                    .frame(height: geometry.size.height - 108 + 27 + 7)
+                    .offset(y: 54)
                     .edgesIgnoringSafeArea(.bottom)
             }
         }
@@ -51,7 +54,8 @@ public struct FoodLabelCamera: View {
     //MARK: - Layers
     var cameraLayer: some View {
         BaseCamera(
-            didScanFoodLabel: didScanFoodLabel,
+            shouldGetImageForScanResult: shouldGetImageForScanResult,
+            imageForScanResult: handleImageForScanResult,
             didCaptureImage: didCaptureImage,
             didScanCode: nil
         )
@@ -62,6 +66,7 @@ public struct FoodLabelCamera: View {
     var boxesLayer: some View {
         if let latestScanResult {
             boxesLayer(for: latestScanResult)
+//                .background(.green.opacity(0.5))
         }
     }
     
@@ -114,24 +119,80 @@ public struct FoodLabelCamera: View {
     
     //MARK: - Actions
     
-    func didScanFoodLabel(_ scanResult: ScanResult) {
-        withAnimation {
-            latestScanResult = scanResult
-        }
-        didScanFoodLabelHandler?(scanResult)
+    func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
+        scanResults.shouldGetImageAfterAdding(result: scanResult)
+    }
+    
+    func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
+        scanResults.set(image, for: scanResult)
+    }
+    
+}
+
+class ScanResultSet: ObservableObject {
+    let scanResult: ScanResult
+    var image: UIImage?
+    init(scanResult: ScanResult, image: UIImage? = nil) {
+        self.scanResult = scanResult
+        self.image = image
     }
 }
 
-extension ScanResult {
-    var resultTexts: [RecognizedText] {
-        nutrientAttributeTexts
+extension Array where Element == ScanResultSet {
+    var sortedByNutrientsCount: [ScanResultSet] {
+        sorted(by: { $0.scanResult.nutrientsCount > $1.scanResult.nutrientsCount })
     }
     
-    var nutrientAttributeTexts: [RecognizedText] {
-        nutrients.rows.map { $0.attributeText.text }
+    var bestCandidate: ScanResult? {
+        guard count >= 3,
+              let withMostNutrients = sortedByNutrientsCount.first?.scanResult
+        else {
+            return nil
+        }
+        
+        /// filter out only the results that has the same nutrient count as the one with the most
+        let filtered = filter({ $0.scanResult.nutrientsCount == withMostNutrients.nutrientsCount })
+            .map { $0.scanResult }
+        
+        var mostFrequentAmounts: [Attribute: Double] = [:]
+        
+        /// for each nutrient, save the modal value across all these filtered results
+        for attribute in withMostNutrients.nutrientAttributes {
+            let doubles = filtered.amounts(for: attribute)
+            guard let mostFrequent = doubles.mostFrequent else { continue }
+            mostFrequentAmounts[attribute] = mostFrequent
+        }
+        
+        /// now sort the filtered results by the count of (how many nutrients in it match the modal results) and return the first one
+        let sorted = filtered.sortedByMostMatchesToAmountsDict(mostFrequentAmounts)
+        
+        /// return the one with the most matches
+        return sorted.first
+    }
+}
+
+class ScanResults: ObservableObject {
+    var array: [ScanResultSet] = []
+        
+    func shouldGetImageAfterAdding(result: ScanResult) -> Bool {
+        guard result.hasNutrients else { return false }
+        array.append(ScanResultSet(scanResult: result, image: nil))
+        
+        if let bestCandidate {
+            print("🥳 Best candidate:")
+            print(bestCandidate.summaryDescription(withEmojiPrefix: "🥳`"))
+            return false
+        }
+        
+        return false
     }
     
-    var nutrientValueTexts: [RecognizedText] {
-        nutrients.rows.map { $0.attributeText.text }
+    var bestCandidate: ScanResult? {
+        array.bestCandidate
+    }
+    
+    
+    func set(_ image: UIImage, for scanResult: ScanResult) {
+        array.first(where: { $0.scanResult.id == scanResult.id })?.image = image
     }
 }
