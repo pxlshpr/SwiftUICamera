@@ -14,7 +14,7 @@ extension CameraView.Coordinator: AVCaptureMetadataOutputObjectsDelegate {
             return
         }
         
-        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+//        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
         Haptics.successFeedback()
         parent.codeHandler?(.success(stringValue))
         
