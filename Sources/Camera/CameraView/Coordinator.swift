@@ -33,24 +33,27 @@ extension CameraView.Coordinator: AVCaptureVideoDataOutputSampleBufferDelegate {
             }
             scanTasks.append(scanTask)
             
-            let start = CFAbsoluteTimeGetCurrent()
+            var start = CFAbsoluteTimeGetCurrent()
             let scanResult = try await scanTask.value
             scanTasks.removeAll(where: { $0 == scanTask })
             
             let duration = (CFAbsoluteTimeGetCurrent()-start).rounded(toPlaces: 2)
             
             print("🥂 Got result in \(duration)s")
-            print(scanResult.summaryDescription(withEmojiPrefix: "🥂"))
+//            print(scanResult.summaryDescription(withEmojiPrefix: "🥂"))
             
-            guard let shouldGetImageForScanResult = parent.shouldGetImageForScanResult,
-                  shouldGetImageForScanResult(scanResult),
-                  let imageForScanResult = parent.imageForScanResult
-            else {
-                return
-            }
+            start = CFAbsoluteTimeGetCurrent()
             
+//            guard let shouldGetImageForScanResult = parent.shouldGetImageForScanResult,
+//                  shouldGetImageForScanResult(scanResult),
+//                  let imageForScanResult = parent.imageForScanResult
+//            else {
+//                return
+//            }
+//
             let image = imageFromSampleBuffer(sampleBuffer: sampleBuffer)
-            imageForScanResult(image, scanResult)
+            print("🥂 Got image in \(duration)s")
+            parent.imageForScanResult?(image, scanResult)
             //            if let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: sampleBuffer, previewPhotoSampleBuffer: nil) {
             //                let image = UIImage(data: imageData)
             //            }

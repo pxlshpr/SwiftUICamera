@@ -39,10 +39,10 @@ public struct BaseCamera: View {
             if isCodeScanner {
                 ScanOverlay()
             }
-//            else {
-//                CaptureOverlay()
-//                    .environmentObject(viewModel)
-//            }
+            else {
+                CaptureOverlay()
+                    .environmentObject(viewModel)
+            }
             if viewModel.showFlashButton {
                 FlashOverlay()
                     .environmentObject(viewModel)
@@ -59,8 +59,6 @@ public struct BaseCamera: View {
                 PhotoPickerOverlay()
                     .environmentObject(viewModel)
             }
-//            ConfigOverlay()
-//                .environmentObject(viewModel)
         }
         .onReceive(didReceiveCapturedImage, perform: didReceiveCapturedImage)
         .onReceive(couldNotCaptureImage, perform: couldNotCaptureImage)

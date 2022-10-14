@@ -6,64 +6,6 @@ import VisionSugar
 import ActivityIndicatorView
 import PrepUnits
 
-struct QueueAttribute {
-    let attribute: Attribute
-    //TODO: Support other types of texts here
-    //TODO: Include images here so we can crop the required bits once the user has tapped on one
-    var values: [FoodLabelValue] = []
-    
-    init?(row: ScanResult.Nutrients.Row) {
-        self.attribute = row.attribute
-        if let value1 = row.value1 {
-            values.append(value1)
-        }
-        if let value2 = row.value2 {
-            values.append(value2)
-        }
-        guard !values.isEmpty else {
-            return nil
-        }
-    }
-    
-    mutating func update(with row: ScanResult.Nutrients.Row) {
-        if let value1 = row.value1, !values.contains(value1) {
-            values.append(value1)
-        }
-        if let value2 = row.value2, !values.contains(value2) {
-            values.append(value2)
-        }
-        
-    }
-}
-
-struct ConfirmedAttribute {
-    let attribute: Attribute
-    var value: FoodLabelValue
-}
-
-extension FoodLabelCamera {
-    func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
-        for row in scanResult.nutrients.rows {
-            guard !confirmedAttributes.contains(where: { $0.attribute == row.attribute }) else {
-                continue
-            }
-            if let index = queuedAttributes.firstIndex(where: { $0.attribute == row.attribute }) {
-                withAnimation {
-                    queuedAttributes[index].update(with: row)
-                }
-            } else {
-                guard let queueAttribute = QueueAttribute(row: row) else {
-                    continue
-                }
-                withAnimation {
-                    queuedAttributes.append(queueAttribute)
-                }
-            }
-        }
-        return false
-    }
-}
-
 public struct FoodLabelCamera: View {
     
     @Environment(\.dismiss) var dismiss
@@ -77,11 +19,6 @@ public struct FoodLabelCamera: View {
     
     @Binding var image: UIImage?
     @Binding var scanResult: ScanResult?
-
-    @State var queuedAttributes: [QueueAttribute] = []
-    @State var confirmedAttributes: [ConfirmedAttribute] = []
-
-    @State var didConfirmAllAttributes: Bool = false
 
     public init(
         image: Binding<UIImage?>,
@@ -116,16 +53,9 @@ public struct FoodLabelCamera: View {
                     .offset(y: 54)
                     .edgesIgnoringSafeArea(.bottom)
             }
-            NutrientPicker(queuedAttributes: $queuedAttributes, didConfirmAllAttributes: $didConfirmAllAttributes)
         }
         .onChange(of: viewModel.shouldDismiss) { newValue in
             if newValue {
-                dismiss()
-            }
-        }
-        .onChange(of: didConfirmAllAttributes) { newValue in
-            if newValue {
-                Haptics.successFeedback()
                 dismiss()
             }
         }
@@ -134,12 +64,15 @@ public struct FoodLabelCamera: View {
     //MARK: - Layers
     var cameraLayer: some View {
         BaseCamera(
-            shouldGetImageForScanResult: shouldGetImageForScanResult,
             imageForScanResult: handleImageForScanResult,
             didCaptureImage: didCaptureImage,
-            didScanCode: nil
+            didScanCode: didScanCode
         )
         .environmentObject(viewModel)
+    }
+    
+    func didScanCode(_ result: Result<String, Camera.ScanError>) {
+        
     }
     
     @ViewBuilder
@@ -179,11 +112,12 @@ public struct FoodLabelCamera: View {
                     )
                 )
                 .opacity(0.4)
+                .opacity(0)
                 .frame(width: boundingBox.rectForSize(size).width,
                        height: boundingBox.rectForSize(size).height)
             
                 .overlay(
-                    ActivityIndicatorView(isVisible: .constant(true), type: .arcs(count: 5, lineWidth: 5))
+                    ActivityIndicatorView(isVisible: .constant(true), type: .arcs())
                         .frame(width: 50, height: 50)
 //                        .frame(width: boundingBox.rectForSize(size).width, height: boundingBox.rectForSize(size).height)
                         .foregroundColor(.accentColor)
@@ -208,7 +142,9 @@ public struct FoodLabelCamera: View {
     
     //MARK: - Actions
     
-    func shouldGetImageForScanResult_legacy(_ scanResult: ScanResult) -> Bool {
+//    func shouldGetImageForScanResult_legacy(_ scanResult: ScanResult) -> Bool {
+//    func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
+    func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
         if let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult) {
             print("🥳 Best candidate, count: \(bestCandidate.count)")
             print(bestCandidate.scanResult.summaryDescription(withEmojiPrefix: "🥳`"))
@@ -216,23 +152,30 @@ public struct FoodLabelCamera: View {
                 boundingBox = bestCandidate.scanResult.boundingBox
             }
             if !haveBestCandidate {
-//                withAnimation {
-//                    haveBestCandidate = true
-//                }
-//                return true
+                withAnimation {
+                    haveBestCandidate = true
+                    self.image = image
+                    self.scanResult = scanResult
+                    
+                    Haptics.successFeedback()
+                    dismiss()
+                }
             }
         } else {
-            guard scanResult.boundingBox != .zero else { return false }
+            guard scanResult.boundingBox != .zero else {
+                return
+            }
             print("🥳 starting box: \(scanResult.boundingBox)")
             withAnimation {
                 boundingBox = scanResult.boundingBox
             }
         }
         
-        return false
+//        return false
     }
     
-    func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
+//    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
+    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
         scanResults.set(image, for: scanResult)
         self.image = image
         self.scanResult = scanResult
