@@ -18,10 +18,10 @@ extension CameraView.Coordinator: AVCaptureMetadataOutputObjectsDelegate {
     }
     
     func found(code: String) {
-        parent.completion?(.success(code))
+        parent.codeHandler?(.success(code))
     }
     
-    func didFail(reason: Camera.ScanError) {
-        parent.completion?(.failure(reason))
+    func didFail(reason: Camera.ScanError) {        
+        parent.codeHandler?(.failure(reason))
     }
 }

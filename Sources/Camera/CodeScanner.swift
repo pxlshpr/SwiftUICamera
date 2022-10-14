@@ -2,10 +2,10 @@ import SwiftUI
 
 public struct CodeScanner: View {
     @StateObject var cameraViewModel: CameraViewModel
-    let didScanCode: ScannedCodeHandler?
+    let codeHandler: CodeHandler?
 
-    public init(showTorchButton: Bool = true, didScanCode: ScannedCodeHandler? = nil) {
-        self.didScanCode = didScanCode
+    public init(showTorchButton: Bool = true, codeHandler: CodeHandler? = nil) {
+        self.codeHandler = codeHandler
         let cameraViewModel = CameraViewModel(
             showFlashButton: false,
             showTorchButton: showTorchButton,
@@ -16,7 +16,7 @@ public struct CodeScanner: View {
     }
     
     public var body: some View {
-        BaseCamera(didCaptureImage: nil, didScanCode: didScanCode)
+        BaseCamera(codeHandler: codeHandler)
             .environmentObject(cameraViewModel)
     }
 }

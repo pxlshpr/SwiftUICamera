@@ -4,34 +4,23 @@ import SwiftHaptics
 import FoodLabelScanner
 
 public struct BaseCamera: View {
-    
-    @EnvironmentObject var cameraViewModel: CameraViewModel
-    let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
 
-    let isCodeScanner: Bool
-    
-    var shouldGetImageForScanResult: ((ScanResult) -> (Bool))?
-    var imageForScanResult: ((UIImage, ScanResult) -> ())?
-    var didScanCode: ScannedCodeHandler?
-    var didCaptureImage: CapturedImageHandler?
-    
-    let sampleBufferHandler: SampleBufferHandler?
-    
     let didReceiveCapturedImage = NotificationCenter.default.publisher(for: .didCaptureImage)
     let couldNotCaptureImage = NotificationCenter.default.publisher(for: .didNotCaptureImage)
-    
+    let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
+
+    @EnvironmentObject var cameraViewModel: CameraViewModel
+    var imageHandler: ImageHandler?
+    let codeHandler: CodeHandler?
+    let sampleBufferHandler: SampleBufferHandler?
+
     public init(
-        shouldGetImageForScanResult: ((ScanResult) -> (Bool))? = nil,
-        imageForScanResult: ((UIImage, ScanResult) -> ())? = nil,
-        didCaptureImage: CapturedImageHandler? = nil,
-        didScanCode: ScannedCodeHandler? = nil,
+        imageHandler: ImageHandler? = nil,
+        codeHandler: CodeHandler? = nil,
         sampleBufferHandler: SampleBufferHandler? = nil
     ) {
-        self.shouldGetImageForScanResult = shouldGetImageForScanResult
-        self.imageForScanResult = imageForScanResult
-        self.didScanCode = didScanCode
-        self.isCodeScanner = didScanCode != nil
-        self.didCaptureImage = didCaptureImage
+        self.imageHandler = imageHandler
+        self.codeHandler = codeHandler
         self.sampleBufferHandler = sampleBufferHandler
     }
     
@@ -41,10 +30,9 @@ public struct BaseCamera: View {
                 .edgesIgnoringSafeArea(.all)
             cameraView
                 .edgesIgnoringSafeArea(.all)
-            if isCodeScanner {
+            if cameraViewModel.mode == .scan {
                 ScanOverlay()
-            }
-            else {
+            } else {
                 CaptureOverlay()
                     .environmentObject(cameraViewModel)
             }
@@ -74,10 +62,7 @@ public struct BaseCamera: View {
             config: $cameraViewModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
-            sampleBufferHandler: sampleBufferHandler,
-            shouldGetImageForScanResult: shouldGetImageForScanResult,
-            imageForScanResult: imageForScanResult,
-            completion: didScanCode
+            sampleBufferHandler: sampleBufferHandler
         )
         .scaleEffect(cameraViewModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
         .padding(.bottom, cameraViewModel.animateCameraViewShrinking ? 15 : 0)
@@ -90,7 +75,7 @@ public struct BaseCamera: View {
             return
         }
         
-        didCaptureImage?(image)
+        imageHandler?(image)
 //        DispatchQueue.main.async {
 //            delegate.didCapture(image)
 //            numberOfCapturedImages += 1

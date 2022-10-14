@@ -2,7 +2,13 @@ import SwiftUI
 import AVKit
 import SwiftHaptics
 
+enum CameraMode {
+    case capture
+    case scan
+}
+
 class CameraViewModel: ObservableObject {
+    let mode: CameraMode
     let showFlashButton: Bool
     let showTorchButton: Bool
     let showPhotoPickerButton: Bool
@@ -16,7 +22,14 @@ class CameraViewModel: ObservableObject {
     
     @Published var shouldDismiss: Bool = false
 
-    init(showFlashButton: Bool, showTorchButton: Bool, showPhotoPickerButton: Bool, showCapturedImagesCount: Bool) {
+    init(
+        mode: CameraMode = .capture,
+        showFlashButton: Bool,
+        showTorchButton: Bool,
+        showPhotoPickerButton: Bool,
+        showCapturedImagesCount: Bool
+    ) {
+        self.mode = mode
         self.showFlashButton = showFlashButton
         self.showTorchButton = showTorchButton
         self.showPhotoPickerButton = showPhotoPickerButton

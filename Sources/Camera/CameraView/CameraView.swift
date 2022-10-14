@@ -10,29 +10,22 @@ public struct CameraView: UIViewControllerRepresentable {
     public let codeTypes: [AVMetadataObject.ObjectType]
     public var simulatedData = ""
     
-    public var completion: ScannedCodeHandler? = nil
-    let shouldGetImageForScanResult: ((ScanResult) -> (Bool))?
-    let imageForScanResult: ((UIImage, ScanResult) -> ())?
-
     let sampleBufferHandler: SampleBufferHandler?
-    
+    let codeHandler: CodeHandler?
+
     @Binding var config: CameraConfiguration
     
     public init(
         config: Binding<CameraConfiguration>,
         codeTypes: [AVMetadataObject.ObjectType],
         simulatedData: String = "",
-        sampleBufferHandler: SampleBufferHandler? = nil,
-        shouldGetImageForScanResult: ((ScanResult) -> (Bool))? = nil,
-        imageForScanResult: ((UIImage, ScanResult) -> ())? = nil,
-        completion: ScannedCodeHandler? = nil
+        codeHandler: CodeHandler? = nil,
+        sampleBufferHandler: SampleBufferHandler? = nil
     ) {
         self.codeTypes = codeTypes
         self.simulatedData = simulatedData
-        self.completion = completion
+        self.codeHandler = codeHandler
         self.sampleBufferHandler = sampleBufferHandler
-        self.shouldGetImageForScanResult = shouldGetImageForScanResult
-        self.imageForScanResult = imageForScanResult
         _config = config
     }
     

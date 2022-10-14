@@ -9,6 +9,9 @@ class ScanResultSets: ObservableObject {
     func bestCandidateAfterAdding(result: ScanResult) -> ScanResultSet? {
         guard result.hasNutrients else { return nil }
         
+        //TODO: Revisit this
+        /// What we were doing here—counting how many times the same `ScanResult` was being received, and then later sorting the results by choosing the latest `ScanResult` that had the most matches. Might be redundant as we're currently waiting as little time as possible before returning.
+        
         /// If we have a `ScanResult` that matches this
 //        if let index = array.firstIndex(where: { $0.scanResult.matches(result) }) {
 //            let existing = array.remove(at: index)
@@ -25,8 +28,8 @@ class ScanResultSets: ObservableObject {
 //            array.append(existing)
 //        } else {
             array.append(ScanResultSet(scanResult: result, image: nil))
-        print("🥶 Array now has \(array.count)")
 //        }
+        
         return bestCandidate
     }
     
@@ -82,4 +85,13 @@ extension Array where Element == ScanResultSet {
     var sortedByNutrientsCount: [ScanResultSet] {
         sorted(by: { $0.scanResult.nutrientsCount > $1.scanResult.nutrientsCount })
     }
+}
+
+//TODO: Revisit this and make it a generic on an array of hashables after rigorous testing as we might have had issues with our first try.
+func commonElementsInArrayUsingReduce(doublesArray: [Double]) -> (Double, Int) {
+    let doublesArray = doublesArray.reduce(into: [:]) { (counts, doubles) in
+        counts[doubles, default: 0] += 1
+    }
+    let element = doublesArray.sorted(by: {$0.value > $1.value}).first
+    return (element?.key ?? 0, element?.value ?? 0)
 }

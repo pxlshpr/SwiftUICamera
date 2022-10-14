@@ -6,40 +6,26 @@ import VisionSugar
 import ActivityIndicatorView
 import PrepUnits
 
+public typealias FoodLabelScanHandler = (ScanResult, UIImage) -> ()
+
 public struct FoodLabelCamera: View {
-    
+
     @Environment(\.dismiss) var dismiss
     @StateObject var cameraViewModel: CameraViewModel
-    let didCaptureImage: CapturedImageHandler?
-    let didScanFoodLabelHandler: ((ScanResult) -> ())?
+    @StateObject var viewModel: FoodLabelCameraViewModel
+    let foodLabelScanHandler: FoodLabelScanHandler
     
-    let scanResults = ScanResultSets()
-    @State var boundingBox: CGRect? = nil
-    @State var haveBestCandidate = false
-    
-    @Binding var image: UIImage?
-    @Binding var scanResult: ScanResult?
-
-    public init(
-        image: Binding<UIImage?>,
-        scanResult: Binding<ScanResult?>,
-        showFlashButton: Bool = false,
-        showTorchButton: Bool = false,
-        showPhotosPickerButton: Bool = false,
-        showCapturedImagesCount: Bool = false,
-        didScanFoodLabel: ((ScanResult) -> ())? = nil,
-        didCaptureImage: CapturedImageHandler? = nil
-    ) {
-        _image = image
-        _scanResult = scanResult
-        self.didCaptureImage = didCaptureImage
-        self.didScanFoodLabelHandler = didScanFoodLabel
+    public init(foodLabelScanHandler: @escaping FoodLabelScanHandler) {
+        self.foodLabelScanHandler = foodLabelScanHandler
+        
+        let viewModel = FoodLabelCameraViewModel(foodLabelScanHandler: foodLabelScanHandler)
+        _viewModel = StateObject(wrappedValue: viewModel)
         
         let cameraViewModel = CameraViewModel(
-            showFlashButton: showFlashButton,
-            showTorchButton: showTorchButton,
-            showPhotoPickerButton: showPhotosPickerButton,
-            showCapturedImagesCount: showCapturedImagesCount
+            showFlashButton: false,
+            showTorchButton: true,
+            showPhotoPickerButton: false,
+            showCapturedImagesCount: false
         )
         _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
     }
@@ -49,13 +35,11 @@ public struct FoodLabelCamera: View {
             cameraLayer
             GeometryReader { geometry in
                 boxesLayer
-                    .frame(height: geometry.size.height - 108 + 27 + 7)
-                    .offset(y: 54)
                     .edgesIgnoringSafeArea(.bottom)
             }
         }
-        .onChange(of: cameraViewModel.shouldDismiss) { newValue in
-            if newValue {
+        .onChange(of: viewModel.shouldDismiss) { newShouldDismiss in
+            if newShouldDismiss {
                 dismiss()
             }
         }
@@ -63,45 +47,22 @@ public struct FoodLabelCamera: View {
     
     //MARK: - Layers
     var cameraLayer: some View {
-        BaseCamera(
-            imageForScanResult: handleImageForScanResult,
-            didCaptureImage: didCaptureImage,
-            didScanCode: didScanCode,
-            sampleBufferHandler: processSampleBuffer
-        )
-        .environmentObject(cameraViewModel)
+        BaseCamera(sampleBufferHandler: viewModel.processSampleBuffer)
+            .environmentObject(cameraViewModel)
     }
     
-    func didScanCode(_ result: Result<String, Camera.ScanError>) {
-        
-    }
     
     @ViewBuilder
     var boxesLayer: some View {
-        if let boundingBox {
+        if let boundingBox = viewModel.boundingBox {
             GeometryReader { geometry in
                 boxLayer(
                     boundingBox: boundingBox,
                     inSize: geometry.size,
-                    color: haveBestCandidate ? .green : Color(.label)
+                    color: viewModel.didSetBestCandidate ? .green : Color(.label)
                 )
             }
         }
-    }
-    
-    func boxesLayer(for scanResult: ScanResult) -> some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                ForEach(scanResult.resultTexts, id: \.self) { text in
-                    boxLayer(for: text, inSize: geometry.size)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-    }
-
-    func boxLayer(for text: RecognizedText, inSize size: CGSize) -> some View {
-        boxLayer(boundingBox: text.boundingBox, inSize: size, color: .accentColor)
     }
     
     func boxLayer(boundingBox: CGRect, inSize size: CGSize, color: Color) -> some View {
@@ -118,13 +79,9 @@ public struct FoodLabelCamera: View {
                        height: boundingBox.rectForSize(size).height)
             
                 .overlay(
-                    ActivityIndicatorView(isVisible: .constant(true), type: .arcs())
-                        .frame(width: 50, height: 50)
-//                        .frame(width: boundingBox.rectForSize(size).width, height: boundingBox.rectForSize(size).height)
+                    ActivityIndicatorView(isVisible: .constant(true), type: .equalizer(count: 6))
+                        .frame(width: 80, height: 80)
                         .foregroundColor(.accentColor)
-//                    RoundedRectangle(cornerRadius: 3)
-//                        .stroke(color, lineWidth: 1)
-//                        .opacity(0.8)
                 )
                 .shadow(radius: 3, x: 0, y: 2)
         }
@@ -139,78 +96,4 @@ public struct FoodLabelCamera: View {
         .offset(x: boundingBox.rectForSize(size).minX,
                 y: boundingBox.rectForSize(size).minY)
     }
-
-    
-    //MARK: - Processing Sample Buffer
-    
-    @State var scanTasks: [Task<ScanResult, Error>] = []
-    @State var lastScanTime: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
-    
-    func processSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
-        Task {
-            let timeElapsed = CFAbsoluteTimeGetCurrent() - lastScanTime
-            guard timeElapsed > 0.5, scanTasks.count < 3 else { return }
-            
-            lastScanTime = CFAbsoluteTimeGetCurrent()
-//            guard scanTask == nil else { return }
-            let scanTask = Task {
-                let scanResult = try await FoodLabelLiveScanner(sampleBuffer: sampleBuffer).scan()
-                return scanResult
-            }
-            scanTasks.append(scanTask)
-            
-            var start = CFAbsoluteTimeGetCurrent()
-            let scanResult = try await scanTask.value
-            scanTasks.removeAll(where: { $0 == scanTask })
-            
-            let duration = (CFAbsoluteTimeGetCurrent()-start).rounded(toPlaces: 2)
-            
-            start = CFAbsoluteTimeGetCurrent()
-            
-            let image = sampleBuffer.image
-            
-            handleImageForScanResult(image, scanResult: scanResult)
-//            parent.imageForScanResult?(image, scanResult)
-        }
-    }
-
-    func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
-        if let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult) {
-            print("🥳 Best candidate, count: \(bestCandidate.count)")
-            print(bestCandidate.scanResult.summaryDescription(withEmojiPrefix: "🥳`"))
-            withAnimation {
-                boundingBox = bestCandidate.scanResult.boundingBox
-            }
-            if !haveBestCandidate {
-                withAnimation {
-                    haveBestCandidate = true
-                    self.image = image
-                    self.scanResult = scanResult
-                    
-                    print("📳 Success")
-                    Haptics.successFeedback()
-                    dismiss()
-                }
-            }
-        } else {
-            guard scanResult.boundingBox != .zero else {
-                return
-            }
-            print("🥳 starting box: \(scanResult.boundingBox)")
-            withAnimation {
-                boundingBox = scanResult.boundingBox
-            }
-        }
-        
-//        return false
-    }
-}
-
-
-func commonElementsInArrayUsingReduce(doublesArray: [Double]) -> (Double, Int) {
-    let doublesArray = doublesArray.reduce(into: [:]) { (counts, doubles) in
-        counts[doubles, default: 0] += 1
-    }
-    let element = doublesArray.sorted(by: {$0.value > $1.value}).first
-    return (element?.key ?? 0, element?.value ?? 0)
 }

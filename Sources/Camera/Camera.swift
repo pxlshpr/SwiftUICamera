@@ -2,17 +2,23 @@ import SwiftUI
 import AVKit
 import SwiftHaptics
 
-public typealias ScannedCodeHandler = ((Result<String, Camera.ScanError>) -> Void)
-public typealias CapturedImageHandler = ((UIImage) -> Void)
+public typealias CodeHandler = ((Result<String, Camera.ScanError>) -> Void)
+public typealias ImageHandler = ((UIImage) -> Void)
 
 public struct Camera: View {
     
     @Environment(\.dismiss) var dismiss
     @StateObject var cameraViewModel: CameraViewModel
-    let didCaptureImage: CapturedImageHandler?
+    let imageHandler: ImageHandler?
     
-    public init(showFlashButton: Bool = true, showTorchButton: Bool = false, showPhotosPickerButton: Bool = false, showCapturedImagesCount: Bool = true, didCaptureImage: CapturedImageHandler? = nil) {
-        self.didCaptureImage = didCaptureImage
+    public init(
+        showFlashButton: Bool = true,
+        showTorchButton: Bool = false,
+        showPhotosPickerButton: Bool = false,
+        showCapturedImagesCount: Bool = true,
+        imageHandler: ImageHandler? = nil
+    ) {
+        self.imageHandler = imageHandler
         let cameraViewModel = CameraViewModel(
             showFlashButton: showFlashButton,
             showTorchButton: showTorchButton,
@@ -23,7 +29,7 @@ public struct Camera: View {
     }
     
     public var body: some View {
-        BaseCamera(didCaptureImage: didCaptureImage, didScanCode: nil)
+        BaseCamera(imageHandler: imageHandler)
             .environmentObject(cameraViewModel)
             .onChange(of: cameraViewModel.shouldDismiss) { newValue in
                 if newValue {
