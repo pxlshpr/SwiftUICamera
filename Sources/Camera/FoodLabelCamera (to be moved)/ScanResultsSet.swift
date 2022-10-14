@@ -37,12 +37,6 @@ class ScanResultsSet: ObservableObject {
     }
 }
 
-extension Array where Element == ScanResult {
-    var sortedByNutrientsCount: [ScanResult] {
-        sorted(by: { $0.nutrientsCount > $1.nutrientsCount })
-    }
-}
-
 extension ScanResultsSet {
     //TODO: Revisit this
     /// What we were doing here—counting how many times the same `ScanResult` was being received, and then later sorting the results by choosing the latest `ScanResult` that had the most matches. Might be redundant as we're currently waiting as little time as possible before returning.

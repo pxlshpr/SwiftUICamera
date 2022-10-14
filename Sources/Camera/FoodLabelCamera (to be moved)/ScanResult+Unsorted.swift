@@ -11,23 +11,6 @@ extension Array where Element == RecognizedText {
     }
 }
 
-extension Array where Element == ScanResult.Nutrients.Row {
-    func matches(_ other: [ScanResult.Nutrients.Row]) -> Bool {
-        guard count == other.count else { return false }
-        return allSatisfy { row in
-            guard let otherRow = other.first(where: { $0.attribute == row.attribute }) else { return false }
-            return row.matches(otherRow)
-        }
-    }
-}
-
-extension ScanResult.Nutrients.Row {
-    func matches(_ otherRow: ScanResult.Nutrients.Row) -> Bool {
-        valueText1?.value.amount == otherRow.valueText1?.value.amount
-        && valueText2?.value.amount == otherRow.valueText2?.value.amount
-    }
-}
-
 extension ScanResult {
     var allTexts: [RecognizedText] {
         servingTexts + headerTexts + nutrientTexts
@@ -79,13 +62,6 @@ extension ScanResult {
 
 extension ScanResult {
     
-    func matches(_ other: ScanResult) -> Bool {
-        nutrients.rows.matches(other.nutrients.rows)
-//        serving == other.serving
-//        && headers == other.headers
-//        && nutrients == other.nutrients
-    }
-    
     var boundingBox: CGRect {
         allTexts
             .filter { $0.boundingBox != .zero }
@@ -134,15 +110,18 @@ extension ScanResult {
 }
 
 extension Array where Element == ScanResult {
+    
     func sortedByMostMatchesToAmountsDict(_ dict: [Attribute : (Double, Int)]) -> [ScanResult] {
         sorted(by: {
             $0.countOfHowManyNutrientsMatchAmounts(in: dict)
             > $1.countOfHowManyNutrientsMatchAmounts(in: dict)
         })
     }
-}
-
-extension Array where Element == ScanResult {
+    
+    var sortedByNutrientsCount: [ScanResult] {
+        sorted(by: { $0.nutrientsCount > $1.nutrientsCount })
+    }
+    
     func amounts(for attribute: Attribute) -> [Double] {
         compactMap { $0.amount(for: attribute) }
     }
