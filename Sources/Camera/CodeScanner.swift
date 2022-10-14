@@ -7,6 +7,7 @@ public struct CodeScanner: View {
     public init(showTorchButton: Bool = true, codeHandler: CodeHandler? = nil) {
         self.codeHandler = codeHandler
         let cameraViewModel = CameraViewModel(
+            mode: .scan,
             showFlashButton: false,
             showTorchButton: showTorchButton,
             showPhotoPickerButton: false,

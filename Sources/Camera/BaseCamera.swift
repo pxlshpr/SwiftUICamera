@@ -7,7 +7,6 @@ public struct BaseCamera: View {
 
     let didReceiveCapturedImage = NotificationCenter.default.publisher(for: .didCaptureImage)
     let couldNotCaptureImage = NotificationCenter.default.publisher(for: .didNotCaptureImage)
-    let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
 
     @EnvironmentObject var cameraViewModel: CameraViewModel
     var imageHandler: ImageHandler?

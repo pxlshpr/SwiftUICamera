@@ -3,6 +3,8 @@ import SwiftUI
 import SwiftUISugar
 import FoodLabelScanner
 
+let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
+
 #if !targetEnvironment(simulator)
 extension CameraView {
     public class CameraViewController: UIViewController {
@@ -89,9 +91,9 @@ extension CameraView.CameraViewController {
             videoOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as String) : NSNumber(value: kCVPixelFormatType_32BGRA as UInt32)]
             captureSession.addOutput(videoOutput)
         } else if isCodeScanning {
+            captureSession.addOutput(metadataOutput)
             metadataOutput.setMetadataObjectsDelegate(delegate, queue: .main)
             metadataOutput.metadataObjectTypes = delegate.parent.codeTypes
-            captureSession.addOutput(metadataOutput)
         } else {
             photoOutput = AVCapturePhotoOutput()
             captureSession.addOutput(photoOutput)
