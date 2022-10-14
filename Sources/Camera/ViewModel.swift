@@ -9,7 +9,6 @@ class ViewModel: ObservableObject {
     let showCapturedImagesCount: Bool
 
     @Published var capturedImageCount: Int = 0
-    
     @Published var animateCameraViewShrinking = false
     @Published var makeCameraViewTranslucent = false
     

@@ -3,6 +3,8 @@ import SwiftUI
 import SwiftUISugar
 import FoodLabelScanner
 
+public typealias SampleBufferHandler = (CMSampleBuffer) -> ()
+
 public struct CameraView: UIViewControllerRepresentable {
 
     public let codeTypes: [AVMetadataObject.ObjectType]
@@ -12,12 +14,15 @@ public struct CameraView: UIViewControllerRepresentable {
     let shouldGetImageForScanResult: ((ScanResult) -> (Bool))?
     let imageForScanResult: ((UIImage, ScanResult) -> ())?
 
+    let sampleBufferHandler: SampleBufferHandler?
+    
     @Binding var config: CameraConfiguration
     
     public init(
         config: Binding<CameraConfiguration>,
         codeTypes: [AVMetadataObject.ObjectType],
         simulatedData: String = "",
+        sampleBufferHandler: SampleBufferHandler? = nil,
         shouldGetImageForScanResult: ((ScanResult) -> (Bool))? = nil,
         imageForScanResult: ((UIImage, ScanResult) -> ())? = nil,
         completion: ScannedCodeHandler? = nil
@@ -25,6 +30,7 @@ public struct CameraView: UIViewControllerRepresentable {
         self.codeTypes = codeTypes
         self.simulatedData = simulatedData
         self.completion = completion
+        self.sampleBufferHandler = sampleBufferHandler
         self.shouldGetImageForScanResult = shouldGetImageForScanResult
         self.imageForScanResult = imageForScanResult
         _config = config

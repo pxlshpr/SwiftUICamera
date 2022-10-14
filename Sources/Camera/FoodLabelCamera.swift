@@ -66,7 +66,8 @@ public struct FoodLabelCamera: View {
         BaseCamera(
             imageForScanResult: handleImageForScanResult,
             didCaptureImage: didCaptureImage,
-            didScanCode: didScanCode
+            didScanCode: didScanCode,
+            sampleBufferHandler: processSampleBuffer
         )
         .environmentObject(viewModel)
     }
@@ -142,8 +143,50 @@ public struct FoodLabelCamera: View {
     
     //MARK: - Actions
     
-//    func shouldGetImageForScanResult_legacy(_ scanResult: ScanResult) -> Bool {
-//    func shouldGetImageForScanResult(_ scanResult: ScanResult) -> Bool {
+
+//    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
+//    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
+//        scanResults.set(image, for: scanResult)
+//        self.image = image
+//        self.scanResult = scanResult
+//
+//        Haptics.successFeedback()
+//        dismiss()
+//    }
+    
+    //MARK: - Processing Sample Buffer
+    
+    @State var scanTasks: [Task<ScanResult, Error>] = []
+    @State var lastScanTime: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
+    
+    func processSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
+        Task {
+            let timeElapsed = CFAbsoluteTimeGetCurrent() - lastScanTime
+            guard timeElapsed > 0.5, scanTasks.count < 3 else { return }
+            
+            lastScanTime = CFAbsoluteTimeGetCurrent()
+//            guard scanTask == nil else { return }
+            let scanTask = Task {
+                let scanResult = try await FoodLabelLiveScanner(sampleBuffer: sampleBuffer).scan()
+                return scanResult
+            }
+            scanTasks.append(scanTask)
+            
+            var start = CFAbsoluteTimeGetCurrent()
+            let scanResult = try await scanTask.value
+            scanTasks.removeAll(where: { $0 == scanTask })
+            
+            let duration = (CFAbsoluteTimeGetCurrent()-start).rounded(toPlaces: 2)
+            
+            start = CFAbsoluteTimeGetCurrent()
+            
+            let image = sampleBuffer.image
+            
+            handleImageForScanResult(image, scanResult: scanResult)
+//            parent.imageForScanResult?(image, scanResult)
+        }
+    }
+
     func handleImageForScanResult(_ image: UIImage, scanResult: ScanResult) {
         if let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult) {
             print("🥳 Best candidate, count: \(bestCandidate.count)")
@@ -157,6 +200,7 @@ public struct FoodLabelCamera: View {
                     self.image = image
                     self.scanResult = scanResult
                     
+                    print("📳 Success")
                     Haptics.successFeedback()
                     dismiss()
                 }
@@ -173,17 +217,6 @@ public struct FoodLabelCamera: View {
         
 //        return false
     }
-    
-//    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
-    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
-        scanResults.set(image, for: scanResult)
-        self.image = image
-        self.scanResult = scanResult
-        
-        Haptics.successFeedback()
-        dismiss()
-    }
-    
 }
 
 class ScanResultSet: ObservableObject {
@@ -232,7 +265,6 @@ extension Array where Element == ScanResultSet {
 //            print("Getting doubles for \(attribute) in \(self.count)")
             
             let doubles = filtered.map({$0.scanResult}).amounts(for: attribute)
-            Haptics.transientHaptic()
             print("🥶 Got \(doubles.count) doubles for \(attribute) \(self.count) array elements")
 
             let mostFrequentWithCount = commonElementsInArrayUsingReduce(doublesArray: doubles)

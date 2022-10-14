@@ -15,19 +15,24 @@ public struct BaseCamera: View {
     var didScanCode: ScannedCodeHandler?
     var didCaptureImage: CapturedImageHandler?
     
+    let sampleBufferHandler: SampleBufferHandler?
+    
     let didReceiveCapturedImage = NotificationCenter.default.publisher(for: .didCaptureImage)
     let couldNotCaptureImage = NotificationCenter.default.publisher(for: .didNotCaptureImage)
     
-    public init(shouldGetImageForScanResult: ((ScanResult) -> (Bool))? = nil,
-                imageForScanResult: ((UIImage, ScanResult) -> ())? = nil,
-                didCaptureImage: CapturedImageHandler? = nil,
-                didScanCode: ScannedCodeHandler? = nil
+    public init(
+        shouldGetImageForScanResult: ((ScanResult) -> (Bool))? = nil,
+        imageForScanResult: ((UIImage, ScanResult) -> ())? = nil,
+        didCaptureImage: CapturedImageHandler? = nil,
+        didScanCode: ScannedCodeHandler? = nil,
+        sampleBufferHandler: SampleBufferHandler? = nil
     ) {
         self.shouldGetImageForScanResult = shouldGetImageForScanResult
         self.imageForScanResult = imageForScanResult
         self.didScanCode = didScanCode
         self.isCodeScanner = didScanCode != nil
         self.didCaptureImage = didCaptureImage
+        self.sampleBufferHandler = sampleBufferHandler
     }
     
     public var body: some View {
@@ -69,6 +74,7 @@ public struct BaseCamera: View {
             config: $viewModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
+            sampleBufferHandler: sampleBufferHandler,
             shouldGetImageForScanResult: shouldGetImageForScanResult,
             imageForScanResult: imageForScanResult,
             completion: didScanCode
