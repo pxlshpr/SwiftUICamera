@@ -62,6 +62,7 @@ public struct BaseCamera: View {
             config: $cameraViewModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
+            codeHandler: codeHandler,
             sampleBufferHandler: sampleBufferHandler
         )
         .scaleEffect(cameraViewModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)

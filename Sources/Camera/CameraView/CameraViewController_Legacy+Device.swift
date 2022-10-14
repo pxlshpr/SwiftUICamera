@@ -241,15 +241,13 @@ extension CameraView.CameraViewController_Legacy {
         previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
         previewLayer?.frame = view.layer.bounds
         view.layer.addSublayer(previewLayer!)
-        
+
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
         view.addGestureRecognizer(tapGestureRecognizer)
     }
     
     @objc func didTapPreview(gesture: UITapGestureRecognizer) {
-//        print("👆🏽 We got a tap, changing to autoFocus")
         changeFocusMode(to: .autoFocus)
-
     }
     
     //MARK: - Actions
@@ -282,28 +280,3 @@ extension CameraView.CameraViewController_Legacy {
 }
 
 #endif
-
-extension AVCaptureDevice {
-    static var defaultCamera: AVCaptureDevice? {
-        
-        if let device = Self.default(.builtInUltraWideCamera, for: .video, position: .back) {
-            return device
-        }
-        
-        // Find the built-in Dual Camera, if it exists.
-        if let device = Self.default(.builtInTripleCamera, for: .video, position: .back) {
-            return device
-        }
-
-        if let device = Self.default(.builtInDualCamera, for: .video, position: .back) {
-            return device
-        }
-
-        // Find the built-in Wide-Angle Camera, if it exists.
-        if let device = Self.default(.builtInWideAngleCamera, for: .video, position: .back) {
-            return device
-        }
-        
-        return nil
-    }
-}
