@@ -1,12 +1,6 @@
 import SwiftUI
-import AVKit
 import SwiftHaptics
-import FoodLabelScanner
-import VisionSugar
 import ActivityIndicatorView
-import PrepUnits
-
-public typealias FoodLabelScanHandler = (ScanResult, UIImage) -> ()
 
 public struct FoodLabelCamera: View {
 
@@ -22,6 +16,7 @@ public struct FoodLabelCamera: View {
         _viewModel = StateObject(wrappedValue: viewModel)
         
         let cameraViewModel = CameraViewModel(
+            mode: .scan,
             showFlashButton: false,
             showTorchButton: true,
             showPhotoPickerButton: false,

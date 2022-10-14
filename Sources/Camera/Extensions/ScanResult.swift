@@ -29,6 +29,55 @@ extension ScanResult.Nutrients.Row {
 }
 
 extension ScanResult {
+    var allTexts: [RecognizedText] {
+        servingTexts + headerTexts + nutrientTexts
+    }
+    var servingTexts: [RecognizedText] {
+        [
+            serving?.amountText?.text,
+            serving?.amountText?.attributeText,
+            serving?.unitText?.text,
+            serving?.unitText?.attributeText,
+            serving?.unitNameText?.text,
+            serving?.unitNameText?.attributeText,
+            serving?.equivalentSize?.amountText.text,
+            serving?.equivalentSize?.amountText.attributeText,
+            serving?.equivalentSize?.unitText?.text,
+            serving?.equivalentSize?.unitText?.attributeText,
+            serving?.equivalentSize?.unitNameText?.text,
+            serving?.equivalentSize?.unitNameText?.attributeText,
+            serving?.perContainer?.amountText.text,
+            serving?.perContainer?.amountText.attributeText,
+            serving?.perContainer?.nameText?.text,
+            serving?.perContainer?.nameText?.attributeText,
+        ]
+            .compactMap { $0 }
+    }
+    
+    var headerTexts: [RecognizedText] {
+        [
+            headers?.headerText1?.text,
+            headers?.headerText1?.attributeText,
+            headers?.headerText2?.text,
+            headers?.headerText2?.attributeText
+        ]
+            .compactMap { $0 }
+    }
+    
+    var nutrientTexts: [RecognizedText] {
+        var texts: [RecognizedText?] = []
+        for row in nutrients.rows {
+            texts.append(row.attributeText.text)
+            texts.append(row.valueText1?.text)
+            texts.append(row.valueText1?.attributeText)
+            texts.append(row.valueText2?.text)
+            texts.append(row.valueText2?.attributeText)
+        }
+        return texts.compactMap { $0 }
+    }
+}
+
+extension ScanResult {
     
     func matches(_ other: ScanResult) -> Bool {
         nutrients.rows.matches(other.nutrients.rows)
@@ -84,11 +133,11 @@ extension ScanResult {
     
 }
 
-extension Array where Element == ScanResultSet {
-    func sortedByMostMatchesToAmountsDict(_ dict: [Attribute : (Double, Int)]) -> [ScanResultSet] {
+extension Array where Element == ScanResult {
+    func sortedByMostMatchesToAmountsDict(_ dict: [Attribute : (Double, Int)]) -> [ScanResult] {
         sorted(by: {
-            $0.scanResult.countOfHowManyNutrientsMatchAmounts(in: dict)
-            > $1.scanResult.countOfHowManyNutrientsMatchAmounts(in: dict)
+            $0.countOfHowManyNutrientsMatchAmounts(in: dict)
+            > $1.countOfHowManyNutrientsMatchAmounts(in: dict)
         })
     }
 }
@@ -96,96 +145,5 @@ extension Array where Element == ScanResultSet {
 extension Array where Element == ScanResult {
     func amounts(for attribute: Attribute) -> [Double] {
         compactMap { $0.amount(for: attribute) }
-    }
-}
-
-//extension Array where Element == any Hashable {
-extension Array where Element: Hashable {
-    var mostFrequent: Element? {
-        let counts = reduce(into: [:]) { $0[$1, default: 0] += 1 }
-
-        if let (value, _) = counts.max(by: { $0.1 < $1.1 }) {
-            return value
-        }
-
-        // array was empty
-        return nil
-    }
-    
-    var mostFrequentWithCount: (Element, Int)? {
-        let counts = reduce(into: [:]) { $0[$1, default: 0] += 1 }
-
-        if let (value, count) = counts.max(by: { $0.1 < $1.1 }) {
-            return (value, count)
-        }
-
-        // array was empty
-        return nil
-    }
-
-}
-//
-//func mostFrequent<T: Hashable>(array: [T]) -> (value: T, count: Int)? {
-//
-//    let counts = array.reduce(into: [:]) { $0[$1, default: 0] += 1 }
-//
-//    if let (value, count) = counts.max(by: { $0.1 < $1.1 }) {
-//        return (value, count)
-//    }
-//
-//    // array was empty
-//    return nil
-//}
-//
-//if let result = mostFrequent(array: ["a", "b", "a", "c", "a", "b"]) {
-//    print("\(result.value) occurs \(result.count) times")
-//}
-
-extension ScanResult {
-    var allTexts: [RecognizedText] {
-        servingTexts + headerTexts + nutrientTexts
-    }
-    var servingTexts: [RecognizedText] {
-        [
-            serving?.amountText?.text,
-            serving?.amountText?.attributeText,
-            serving?.unitText?.text,
-            serving?.unitText?.attributeText,
-            serving?.unitNameText?.text,
-            serving?.unitNameText?.attributeText,
-            serving?.equivalentSize?.amountText.text,
-            serving?.equivalentSize?.amountText.attributeText,
-            serving?.equivalentSize?.unitText?.text,
-            serving?.equivalentSize?.unitText?.attributeText,
-            serving?.equivalentSize?.unitNameText?.text,
-            serving?.equivalentSize?.unitNameText?.attributeText,
-            serving?.perContainer?.amountText.text,
-            serving?.perContainer?.amountText.attributeText,
-            serving?.perContainer?.nameText?.text,
-            serving?.perContainer?.nameText?.attributeText,
-        ]
-            .compactMap { $0 }
-    }
-    
-    var headerTexts: [RecognizedText] {
-        [
-            headers?.headerText1?.text,
-            headers?.headerText1?.attributeText,
-            headers?.headerText2?.text,
-            headers?.headerText2?.attributeText
-        ]
-            .compactMap { $0 }
-    }
-    
-    var nutrientTexts: [RecognizedText] {
-        var texts: [RecognizedText?] = []
-        for row in nutrients.rows {
-            texts.append(row.attributeText.text)
-            texts.append(row.valueText1?.text)
-            texts.append(row.valueText1?.attributeText)
-            texts.append(row.valueText2?.text)
-            texts.append(row.valueText2?.attributeText)
-        }
-        return texts.compactMap { $0 }
     }
 }

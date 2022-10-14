@@ -3,13 +3,15 @@ import SwiftUI
 import FoodLabelScanner
 import SwiftHaptics
 
+public typealias FoodLabelScanHandler = (ScanResult, UIImage) -> ()
+
 class FoodLabelCameraViewModel: ObservableObject {
 
     /// Tweak this if needed, but these current values result in the least dropped frames with the quickest response time on the iPhone 13 Pro Max
     let MinimumTimeBetweenScans = 0.5
     let MaximumConcurrentScanTasks = 3
     
-    let scanResults = ScanResultSets()
+    let scanResultsSet = ScanResultsSet()
     @Published var boundingBox: CGRect? = nil
     @Published var didSetBestCandidate = false
     @Published var shouldDismiss = false
@@ -56,19 +58,22 @@ class FoodLabelCameraViewModel: ObservableObject {
     }
 
     func process(_ scanResult: ScanResult, for image: UIImage) async {
+        
+        /// Add this result to the results set
+        scanResultsSet.append(scanResult)
+        
         /// Attempt to get a best candidate after adding the `ScanResult` to the `ScanResultsSet`
-        let bestCandidate = scanResults.bestCandidateAfterAdding(result: scanResult)
+        let bestScanResult = scanResultsSet.bestCandidate
 
         /// Set the `boundingBox` (over which the activity indicator is shown) to either be
         /// the best candidate's bounding box, or this one's—if still not avialable
         await MainActor.run {
             withAnimation {
-                boundingBox = bestCandidate?.scanResult.boundingBox ?? scanResult.boundingBox
+                boundingBox = bestScanResult?.boundingBox ?? scanResult.boundingBox
             }
             
             /// If we have a best candidate avaiable—and it hasn't already been processed
-            guard let bestScanResult = bestCandidate?.scanResult,
-                  !didSetBestCandidate
+            guard let bestScanResult, !didSetBestCandidate
             else {
                 return
             }
