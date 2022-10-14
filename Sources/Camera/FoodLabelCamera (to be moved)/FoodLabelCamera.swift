@@ -9,11 +9,11 @@ import PrepUnits
 public struct FoodLabelCamera: View {
     
     @Environment(\.dismiss) var dismiss
-    @StateObject var viewModel: ViewModel
+    @StateObject var cameraViewModel: CameraViewModel
     let didCaptureImage: CapturedImageHandler?
     let didScanFoodLabelHandler: ((ScanResult) -> ())?
     
-    let scanResults = ScanResults()
+    let scanResults = ScanResultSets()
     @State var boundingBox: CGRect? = nil
     @State var haveBestCandidate = false
     
@@ -35,13 +35,13 @@ public struct FoodLabelCamera: View {
         self.didCaptureImage = didCaptureImage
         self.didScanFoodLabelHandler = didScanFoodLabel
         
-        let viewModel = ViewModel(
+        let cameraViewModel = CameraViewModel(
             showFlashButton: showFlashButton,
             showTorchButton: showTorchButton,
             showPhotoPickerButton: showPhotosPickerButton,
             showCapturedImagesCount: showCapturedImagesCount
         )
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
     }
     
     public var body: some View {
@@ -54,7 +54,7 @@ public struct FoodLabelCamera: View {
                     .edgesIgnoringSafeArea(.bottom)
             }
         }
-        .onChange(of: viewModel.shouldDismiss) { newValue in
+        .onChange(of: cameraViewModel.shouldDismiss) { newValue in
             if newValue {
                 dismiss()
             }
@@ -69,7 +69,7 @@ public struct FoodLabelCamera: View {
             didScanCode: didScanCode,
             sampleBufferHandler: processSampleBuffer
         )
-        .environmentObject(viewModel)
+        .environmentObject(cameraViewModel)
     }
     
     func didScanCode(_ result: Result<String, Camera.ScanError>) {
@@ -141,19 +141,6 @@ public struct FoodLabelCamera: View {
     }
 
     
-    //MARK: - Actions
-    
-
-//    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
-//    func handleImageForScanResult_legacy(_ image: UIImage, scanResult: ScanResult) {
-//        scanResults.set(image, for: scanResult)
-//        self.image = image
-//        self.scanResult = scanResult
-//
-//        Haptics.successFeedback()
-//        dismiss()
-//    }
-    
     //MARK: - Processing Sample Buffer
     
     @State var scanTasks: [Task<ScanResult, Error>] = []
@@ -219,22 +206,6 @@ public struct FoodLabelCamera: View {
     }
 }
 
-class ScanResultSet: ObservableObject {
-    var scanResult: ScanResult
-    var date: Date = Date()
-    var image: UIImage?
-    
-    /// How many times this has been repeated
-    var count: Int
-    
-    init(scanResult: ScanResult, image: UIImage? = nil) {
-        self.scanResult = scanResult
-        self.image = image
-        self.count = 0
-    }
-}
-
-var mostFrequentAmounts: [Attribute: (Double, Int)] = [:]
 
 func commonElementsInArrayUsingReduce(doublesArray: [Double]) -> (Double, Int) {
     let doublesArray = doublesArray.reduce(into: [:]) { (counts, doubles) in
@@ -242,89 +213,4 @@ func commonElementsInArrayUsingReduce(doublesArray: [Double]) -> (Double, Int) {
     }
     let element = doublesArray.sorted(by: {$0.value > $1.value}).first
     return (element?.key ?? 0, element?.value ?? 0)
-}
-
-extension Array where Element == ScanResultSet {
-    var sortedByNutrientsCount: [ScanResultSet] {
-        sorted(by: { $0.scanResult.nutrientsCount > $1.scanResult.nutrientsCount })
-    }
-    
-    var bestCandidate: ScanResultSet? {
-        guard count >= 3, let withMostNutrients = sortedByNutrientsCount.first
-        else {
-            return nil
-        }
-        
-        /// filter out only the results that has the same nutrient count as the one with the most
-//        let filtered = filter({ $0.scanResult.nutrientsCount == withMostNutrients.scanResult.nutrientsCount })
-        let filtered = self
-        
-        /// for each nutrient, save the modal value across all these filtered results
-        for attribute in withMostNutrients.scanResult.nutrientAttributes {
-            
-//            print("Getting doubles for \(attribute) in \(self.count)")
-            
-            let doubles = filtered.map({$0.scanResult}).amounts(for: attribute)
-            print("🥶 Got \(doubles.count) doubles for \(attribute) \(self.count) array elements")
-
-            let mostFrequentWithCount = commonElementsInArrayUsingReduce(doublesArray: doubles)
-            
-//            guard let mostFrequentWithCount = doubles.mostFrequentWithCount else {
-//                continue
-//            }
-            mostFrequentAmounts[attribute] = mostFrequentWithCount
-            print("🥶 Most frequent amounts for \(self.count) is now:")
-            for key in mostFrequentAmounts.keys {
-                print("🥶     \(key): \(mostFrequentAmounts[key]?.0 ?? 0) (\(mostFrequentAmounts[key]?.1 ?? 0) times)")
-            }
-            print("🥶  -----------------")
-            print("🥶  ")
-        }
-        
-        /// now sort the filtered results by the count of (how many nutrients in it match the modal results) and return the first one
-        let sorted = filtered
-            .sortedByMostMatchesToAmountsDict(mostFrequentAmounts)
-            .sorted { $0.date > $1.date }
-            .sorted { $0.count > $1.count }
-        
-        /// return the one with the most matches
-        return sorted.first
-    }
-}
-
-class ScanResults: ObservableObject {
-    var array: [ScanResultSet] = []
-        
-    func bestCandidateAfterAdding(result: ScanResult) -> ScanResultSet? {
-        guard result.hasNutrients else { return nil }
-        
-        /// If we have a `ScanResult` that matches this
-//        if let index = array.firstIndex(where: { $0.scanResult.matches(result) }) {
-//            let existing = array.remove(at: index)
-//
-//            /// Replace the scan result with the new one (so we always keep the latest copy)
-//            existing.scanResult = result
-//
-//            /// Update the date
-//            existing.date = Date()
-//
-//            /// Increase the count
-//            existing.count += 1
-//
-//            array.append(existing)
-//        } else {
-            array.append(ScanResultSet(scanResult: result, image: nil))
-        print("🥶 Array now has \(array.count)")
-//        }
-        return bestCandidate
-    }
-    
-    var bestCandidate: ScanResultSet? {
-        array.bestCandidate
-    }
-    
-    
-    func set(_ image: UIImage, for scanResult: ScanResult) {
-        array.first(where: { $0.scanResult.id == scanResult.id })?.image = image
-    }
 }

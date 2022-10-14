@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct TorchOverlay: View {
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var cameraViewModel: CameraViewModel
     
     var body: some View {
         VStack {
@@ -18,11 +18,11 @@ struct TorchOverlay: View {
     
     var button: some View {
         Button {
-            viewModel.tappedTorchButton()
+            cameraViewModel.tappedTorchButton()
         } label: {
             CameraButtonLabel(
-                systemImage: $viewModel.config.torchMode.systemImage,
-                isSelected: $viewModel.config.torchMode.isSelected)
+                systemImage: $cameraViewModel.config.torchMode.systemImage,
+                isSelected: $cameraViewModel.config.torchMode.isSelected)
             .padding(.top, 20)
             .padding(.leading, 40)
             .padding(.trailing, 9)

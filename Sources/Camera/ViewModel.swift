@@ -2,7 +2,7 @@ import SwiftUI
 import AVKit
 import SwiftHaptics
 
-class ViewModel: ObservableObject {
+class CameraViewModel: ObservableObject {
     let showFlashButton: Bool
     let showTorchButton: Bool
     let showPhotoPickerButton: Bool

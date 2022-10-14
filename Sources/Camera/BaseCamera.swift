@@ -5,7 +5,7 @@ import FoodLabelScanner
 
 public struct BaseCamera: View {
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var cameraViewModel: CameraViewModel
     let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
 
     let isCodeScanner: Bool
@@ -46,23 +46,23 @@ public struct BaseCamera: View {
             }
             else {
                 CaptureOverlay()
-                    .environmentObject(viewModel)
+                    .environmentObject(cameraViewModel)
             }
-            if viewModel.showFlashButton {
+            if cameraViewModel.showFlashButton {
                 FlashOverlay()
-                    .environmentObject(viewModel)
+                    .environmentObject(cameraViewModel)
             }
-            if viewModel.showTorchButton {
+            if cameraViewModel.showTorchButton {
                 TorchOverlay()
-                    .environmentObject(viewModel)
+                    .environmentObject(cameraViewModel)
             }
-            if viewModel.showCapturedImagesCount {
+            if cameraViewModel.showCapturedImagesCount {
                 CapturedPhotosOverlay()
-                    .environmentObject(viewModel)
+                    .environmentObject(cameraViewModel)
             }
-            if viewModel.showPhotoPickerButton {
+            if cameraViewModel.showPhotoPickerButton {
                 PhotoPickerOverlay()
-                    .environmentObject(viewModel)
+                    .environmentObject(cameraViewModel)
             }
         }
         .onReceive(didReceiveCapturedImage, perform: didReceiveCapturedImage)
@@ -71,7 +71,7 @@ public struct BaseCamera: View {
     
     var cameraView: some View {
         CameraView(
-            config: $viewModel.config,
+            config: $cameraViewModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
             sampleBufferHandler: sampleBufferHandler,
@@ -79,10 +79,10 @@ public struct BaseCamera: View {
             imageForScanResult: imageForScanResult,
             completion: didScanCode
         )
-        .scaleEffect(viewModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
-        .padding(.bottom, viewModel.animateCameraViewShrinking ? 15 : 0)
-        .padding(.trailing, viewModel.animateCameraViewShrinking ? 15 : 0)
-        .opacity(viewModel.makeCameraViewTranslucent ? 0 : 1)
+        .scaleEffect(cameraViewModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
+        .padding(.bottom, cameraViewModel.animateCameraViewShrinking ? 15 : 0)
+        .padding(.trailing, cameraViewModel.animateCameraViewShrinking ? 15 : 0)
+        .opacity(cameraViewModel.makeCameraViewTranslucent ? 0 : 1)
     }
     
     func didReceiveCapturedImage(notification: Notification) {

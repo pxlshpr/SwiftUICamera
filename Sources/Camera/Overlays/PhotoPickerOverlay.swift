@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct PhotoPickerOverlay: View {
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var cameraViewModel: CameraViewModel
     
     var body: some View {
         VStack {
@@ -18,7 +18,7 @@ struct PhotoPickerOverlay: View {
     
     var button: some View {
         Button {
-//            viewModel.tappedPhotoPicker()
+//            cameraViewModel.tappedPhotoPicker()
         } label: {
             CameraButtonLabel(
                 systemImage: .constant("photo.fill.on.rectangle.fill"),
