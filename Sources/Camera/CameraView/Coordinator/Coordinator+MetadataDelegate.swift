@@ -15,6 +15,7 @@ extension CameraView.Coordinator: AVCaptureMetadataOutputObjectsDelegate {
         }
         
         AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+        Haptics.successFeedback()
         parent.codeHandler?(.success(stringValue))
         
         // make sure we only trigger scans once per use
