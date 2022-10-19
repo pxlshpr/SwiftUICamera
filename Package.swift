@@ -18,8 +18,8 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.0"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.172"),
-        .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.56"),
-        .package(url: "https://github.com/pxlshpr/FoodLabelScanner", from: "0.0.53"),
+        .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.71"),
+        .package(url: "https://github.com/pxlshpr/FoodLabelScanner", from: "0.0.67"),
         .package(url: "https://github.com/pxlshpr/FoodLabel", from: "0.0.23"),
         .package(url: "https://github.com/exyte/ActivityIndicatorView", from: "1.1.0"),
     ],
