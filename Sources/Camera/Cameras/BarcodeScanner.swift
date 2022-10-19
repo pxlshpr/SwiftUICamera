@@ -3,13 +3,27 @@ import SwiftUI
 import VisionSugar
 import SwiftHaptics
 
-public typealias RecognizedBarcodesHandler = ([RecognizedBarcode], UIImage) -> ()
+public typealias RecognizedBarcodesHandler = ([RecognizedBarcode]) -> ()
+public typealias RecognizedBarcodesAndImageHandler = ([RecognizedBarcode], UIImage) -> ()
 
 public struct BarcodeScanner: View {
     
     @Environment(\.dismiss) var dismiss
     @StateObject var cameraViewModel: CameraViewModel
     @StateObject var viewModel: BarcodeScannerViewModel
+
+    public init(showTorchButton: Bool = true, barcodesAndImageHandler: @escaping RecognizedBarcodesAndImageHandler) {
+        let cameraViewModel = CameraViewModel(
+            mode: .scan,
+            showFlashButton: false,
+            showTorchButton: showTorchButton,
+            showPhotoPickerButton: false,
+            showCapturedImagesCount: false
+        )
+        _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
+        let viewModel = BarcodeScannerViewModel(barcodesAndImageHandler: barcodesAndImageHandler)
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     public init(showTorchButton: Bool = true, barcodesHandler: @escaping RecognizedBarcodesHandler) {
         let cameraViewModel = CameraViewModel(
@@ -23,7 +37,7 @@ public struct BarcodeScanner: View {
         let viewModel = BarcodeScannerViewModel(barcodesHandler: barcodesHandler)
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     public var body: some View {
         BaseCamera(sampleBufferHandler: viewModel.processSampleBuffer)
             .environmentObject(cameraViewModel)
@@ -37,12 +51,20 @@ public struct BarcodeScanner: View {
 
 class BarcodeScannerViewModel: ObservableObject {
     
-    let barcodesHandler: RecognizedBarcodesHandler
+    let barcodesHandler: RecognizedBarcodesHandler?
+    let barcodesAndImageHandler: RecognizedBarcodesAndImageHandler?
+
     @Published var shouldDismiss = false
     @Published var didCallHandler = false
 
     init(barcodesHandler: @escaping RecognizedBarcodesHandler) {
         self.barcodesHandler = barcodesHandler
+        self.barcodesAndImageHandler = nil
+    }
+
+    init(barcodesAndImageHandler: @escaping RecognizedBarcodesAndImageHandler) {
+        self.barcodesAndImageHandler = barcodesAndImageHandler
+        self.barcodesHandler = nil
     }
 
     func processSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
@@ -61,16 +83,25 @@ class BarcodeScannerViewModel: ObservableObject {
                 didCallHandler = true
             }
             
-            guard let image = sampleBuffer.image else {
-                //TODO: Throw error here instead
-                fatalError("Couldn't get image")
+            if let barcodesAndImageHandler {
+                guard let image = sampleBuffer.image else {
+                    //TODO: Throw error here instead
+                    fatalError("Couldn't get image")
+                }
+
+                await MainActor.run {
+                    Haptics.successFeedback()
+                    barcodesAndImageHandler(barcodes, image)
+                    shouldDismiss = true
+                }
+            } else if let barcodesHandler {
+                await MainActor.run {
+                    Haptics.successFeedback()
+                    barcodesHandler(barcodes)
+                    shouldDismiss = true
+                }
             }
 
-            await MainActor.run {
-                Haptics.successFeedback()
-                barcodesHandler(barcodes, image)
-                shouldDismiss = true
-            }
         }
     }
 }
