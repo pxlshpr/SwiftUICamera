@@ -3,7 +3,7 @@ import SwiftUI
 import VisionSugar
 import SwiftHaptics
 
-public typealias RecognizedBarcodesHandler = ([RecognizedBarcode]) -> ()
+public typealias RecognizedBarcodesHandler = ([RecognizedBarcode], UIImage) -> ()
 
 public struct BarcodeScanner: View {
     
@@ -46,33 +46,29 @@ class BarcodeScannerViewModel: ObservableObject {
     }
 
     func processSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
-        guard !didCallHandler else {
-            print("🥸 didCallHandler so returning")
-            return
-        }
-
-        print("🥸 didCallHandler == \(didCallHandler) so continuing")
+        /// Check this flag before processing the sample buffer
+        guard !didCallHandler else { return }
 
         Task {
-            /// Make sure we only do this once
-            
+
             let barcodes = try await sampleBuffer.recognizedBarcodes()
-            guard !barcodes.isEmpty else {
-                return
+            guard !barcodes.isEmpty else { return }
+
+            /// Check it again within the task in case we had multiple queued up before setting it to `true`
+            guard !didCallHandler else { return }
+
+            await MainActor.run {
+                didCallHandler = true
             }
             
+            guard let image = sampleBuffer.image else {
+                //TODO: Throw error here instead
+                fatalError("Couldn't get image")
+            }
+
             await MainActor.run {
-                
-                guard !didCallHandler else {
-                    print("🥸 didCallHandler so returning")
-                    return
-                }
-                
-                didCallHandler = true
-                print("🥸 set didCallHandler to true")
-                
                 Haptics.successFeedback()
-                barcodesHandler(barcodes)
+                barcodesHandler(barcodes, image)
                 shouldDismiss = true
             }
         }
