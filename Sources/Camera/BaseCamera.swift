@@ -1,7 +1,6 @@
 import SwiftUI
 import AVKit
 import SwiftHaptics
-import FoodLabelScanner
 
 public struct BaseCamera: View {
 

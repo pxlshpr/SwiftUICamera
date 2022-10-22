@@ -1,7 +1,6 @@
 import AVFoundation
 import SwiftUI
 import SwiftUISugar
-import FoodLabelScanner
 
 public typealias SampleBufferHandler = (CMSampleBuffer) -> ()
 

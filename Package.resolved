@@ -1,42 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "activityindicatorview",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/exyte/ActivityIndicatorView",
-      "state" : {
-        "revision" : "0fb57e69b6130b4beb8ba49eaafe13563f2f6bd6",
-        "version" : "1.1.0"
-      }
-    },
-    {
-      "identity" : "foodlabel",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pxlshpr/FoodLabel",
-      "state" : {
-        "revision" : "07b36f81c44d0cda1f1e4b298c1bb705d9ed03aa",
-        "version" : "0.0.23"
-      }
-    },
-    {
-      "identity" : "foodlabelscanner",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pxlshpr/FoodLabelScanner",
-      "state" : {
-        "revision" : "4a022093e597c4cba62d190fccd1df9932a9c898",
-        "version" : "0.0.68"
-      }
-    },
-    {
-      "identity" : "prepunits",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pxlshpr/PrepUnits",
-      "state" : {
-        "revision" : "6cf7149d995ab1893e30c339c42c2c5bab02513e",
-        "version" : "0.0.100"
-      }
-    },
-    {
       "identity" : "swifthaptics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftHaptics",

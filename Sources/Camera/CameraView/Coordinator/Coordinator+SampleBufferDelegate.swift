@@ -1,5 +1,4 @@
 import AVFoundation
-import FoodLabelScanner
 import SwiftUI
 
 extension CameraView.Coordinator: AVCaptureVideoDataOutputSampleBufferDelegate {

@@ -1,7 +1,6 @@
 import AVFoundation
 import SwiftUI
 import SwiftUISugar
-import FoodLabelScanner
 
 let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
 
