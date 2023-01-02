@@ -50,6 +50,11 @@ public struct BaseCamera: View {
                 PhotoPickerOverlay()
                     .environmentObject(cameraViewModel)
             }
+            if cameraViewModel.showDismissButton {
+                DismissButtonOverlay()
+                    .environmentObject(cameraViewModel)
+            }
+
         }
         .onReceive(didReceiveCapturedImage, perform: didReceiveCapturedImage)
         .onReceive(couldNotCaptureImage, perform: couldNotCaptureImage)

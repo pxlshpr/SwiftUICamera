@@ -7,12 +7,12 @@ struct TorchOverlay: View {
     
     var body: some View {
         VStack {
+            Spacer()
             HStack {
                 Spacer()
                 button
                     .padding(.trailing)
             }
-            Spacer()
         }
     }
     
@@ -23,9 +23,15 @@ struct TorchOverlay: View {
             CameraButtonLabel(
                 systemImage: $cameraViewModel.config.torchMode.systemImage,
                 isSelected: $cameraViewModel.config.torchMode.isSelected)
-            .padding(.top, 20)
+            
+//            .padding(.top, 20)
+//            .padding(.leading, 40)
+//            .padding(.trailing, 9)
+
+            .padding(.bottom, 20)
             .padding(.leading, 40)
             .padding(.trailing, 9)
+
             .background(Color.clear)
             .contentShape(Rectangle())
         }

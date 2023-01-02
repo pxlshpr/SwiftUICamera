@@ -12,9 +12,14 @@ public struct BarcodeScanner: View {
     @StateObject var cameraViewModel: CameraViewModel
     @StateObject var viewModel: BarcodeScannerViewModel
 
-    public init(showTorchButton: Bool = true, barcodesAndImageHandler: @escaping RecognizedBarcodesAndImageHandler) {
+    public init(
+        showDismissButton: Bool = true,
+        showTorchButton: Bool = true,
+        barcodesAndImageHandler: @escaping RecognizedBarcodesAndImageHandler
+    ) {
         let cameraViewModel = CameraViewModel(
             mode: .scan,
+            showDismissButton: showDismissButton,
             showFlashButton: false,
             showTorchButton: showTorchButton,
             showPhotoPickerButton: false,
@@ -25,9 +30,14 @@ public struct BarcodeScanner: View {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
-    public init(showTorchButton: Bool = true, barcodesHandler: @escaping RecognizedBarcodesHandler) {
+    public init(
+        showDismissButton: Bool = true,
+        showTorchButton: Bool = true,
+        barcodesHandler: @escaping RecognizedBarcodesHandler
+    ) {
         let cameraViewModel = CameraViewModel(
             mode: .scan,
+            showDismissButton: showDismissButton,
             showFlashButton: false,
             showTorchButton: showTorchButton,
             showPhotoPickerButton: false,
@@ -42,6 +52,11 @@ public struct BarcodeScanner: View {
         BaseCamera(sampleBufferHandler: viewModel.processSampleBuffer)
             .environmentObject(cameraViewModel)
             .onChange(of: viewModel.shouldDismiss) { newShouldDismiss in
+                if newShouldDismiss {
+                    dismiss()
+                }
+            }
+            .onChange(of: cameraViewModel.shouldDismiss) { newShouldDismiss in
                 if newShouldDismiss {
                     dismiss()
                 }

@@ -41,9 +41,11 @@ struct FlashOverlay: View {
                 systemImage: $cameraViewModel.config.flashMode.systemImage,
                 backgroundColor: $cameraViewModel.config.flashMode.backgroundColor,
                 isSelected: $cameraViewModel.config.flashMode.isSelected)
+            
             .padding(.top, 20)
             .padding(.leading, 9)
             .padding(.trailing, 40)
+            
             .background(Color.clear)
             .contentShape(Rectangle())
         } primaryAction: {

@@ -12,6 +12,7 @@ public struct Camera: View {
     let imageHandler: ImageHandler?
     
     public init(
+        showDismissButton: Bool = true,
         showFlashButton: Bool = true,
         showTorchButton: Bool = false,
         showPhotosPickerButton: Bool = false,
@@ -20,6 +21,7 @@ public struct Camera: View {
     ) {
         self.imageHandler = imageHandler
         let cameraViewModel = CameraViewModel(
+            showDismissButton: showDismissButton,
             showFlashButton: showFlashButton,
             showTorchButton: showTorchButton,
             showPhotoPickerButton: showPhotosPickerButton,

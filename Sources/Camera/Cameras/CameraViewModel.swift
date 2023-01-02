@@ -9,6 +9,7 @@ public enum CameraMode {
 
 public class CameraViewModel: ObservableObject {
     let mode: CameraMode
+    let showDismissButton: Bool
     let showFlashButton: Bool
     let showTorchButton: Bool
     let showPhotoPickerButton: Bool
@@ -24,6 +25,7 @@ public class CameraViewModel: ObservableObject {
 
     public init(
         mode: CameraMode = .capture,
+        showDismissButton: Bool,
         showFlashButton: Bool,
         showTorchButton: Bool,
         showPhotoPickerButton: Bool,
@@ -34,6 +36,11 @@ public class CameraViewModel: ObservableObject {
         self.showTorchButton = showTorchButton
         self.showPhotoPickerButton = showPhotoPickerButton
         self.showCapturedImagesCount = showCapturedImagesCount
+        self.showDismissButton = showDismissButton
+    }
+    
+    func tappedDismiss() {
+        shouldDismiss = true
     }
     
     func tappedCapture() {

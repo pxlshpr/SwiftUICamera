@@ -4,10 +4,15 @@ public struct CodeScanner: View {
     @StateObject var cameraViewModel: CameraViewModel
     let codeHandler: CodeHandler?
 
-    public init(showTorchButton: Bool = true, codeHandler: CodeHandler? = nil) {
+    public init(
+        showDismissButton: Bool = true,
+        showTorchButton: Bool = true,
+        codeHandler: CodeHandler? = nil
+    ) {
         self.codeHandler = codeHandler
         let cameraViewModel = CameraViewModel(
             mode: .scan,
+            showDismissButton: showDismissButton,
             showFlashButton: false,
             showTorchButton: showTorchButton,
             showPhotoPickerButton: false,
