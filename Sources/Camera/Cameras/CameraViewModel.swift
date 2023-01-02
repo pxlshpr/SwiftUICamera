@@ -22,6 +22,7 @@ public class CameraViewModel: ObservableObject {
     @Published var config: CameraConfiguration = CameraConfiguration()
     
     @Published public var shouldDismiss: Bool = false
+    @Published public var shouldShowScanOverlay: Bool = true
 
     public init(
         mode: CameraMode = .capture,

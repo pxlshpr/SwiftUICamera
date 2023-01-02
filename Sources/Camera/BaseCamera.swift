@@ -29,7 +29,9 @@ public struct BaseCamera: View {
             cameraView
                 .edgesIgnoringSafeArea(.all)
             if cameraViewModel.mode == .scan {
-                ScanOverlay()
+                if cameraViewModel.shouldShowScanOverlay {
+                    ScanOverlay()
+                }
             } else {
                 CaptureOverlay()
                     .environmentObject(cameraViewModel)
