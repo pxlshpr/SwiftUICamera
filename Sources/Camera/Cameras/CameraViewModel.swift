@@ -22,10 +22,11 @@ public class CameraViewModel: ObservableObject {
     @Published var config: CameraConfiguration = CameraConfiguration()
     
     @Published public var shouldDismiss: Bool = false
-    @Published public var shouldShowScanOverlay: Bool = true
+    @Published public var shouldShowScanOverlay: Bool
 
     public init(
         mode: CameraMode = .capture,
+        shouldShowScanOverlay: Bool = true,
         showDismissButton: Bool,
         showFlashButton: Bool,
         showTorchButton: Bool,
@@ -33,6 +34,7 @@ public class CameraViewModel: ObservableObject {
         showCapturedImagesCount: Bool
     ) {
         self.mode = mode
+        self.shouldShowScanOverlay = shouldShowScanOverlay
         self.showFlashButton = showFlashButton
         self.showTorchButton = showTorchButton
         self.showPhotoPickerButton = showPhotoPickerButton
