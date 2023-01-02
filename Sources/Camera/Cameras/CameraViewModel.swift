@@ -21,7 +21,7 @@ public class CameraViewModel: ObservableObject {
     
     @Published var config: CameraConfiguration = CameraConfiguration()
     
-    @Published var shouldDismiss: Bool = false
+    @Published public var shouldDismiss: Bool = false
 
     public init(
         mode: CameraMode = .capture,
