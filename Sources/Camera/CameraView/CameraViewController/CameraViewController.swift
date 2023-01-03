@@ -219,6 +219,7 @@ extension CameraView.CameraViewController {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
         previewLayer?.frame = view.layer.bounds
+        previewLayer?.connection?.videoOrientation = .portrait
         view.layer.addSublayer(previewLayer!)
         //TODO: Is this needed?
 //        updateOrientation()
