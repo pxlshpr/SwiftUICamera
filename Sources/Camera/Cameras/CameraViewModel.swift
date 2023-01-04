@@ -14,6 +14,8 @@ public class CameraViewModel: ObservableObject {
     let showTorchButton: Bool
     let showPhotoPickerButton: Bool
     let showCapturedImagesCount: Bool
+    
+    let showCaptureAnimation: Bool
 
     @Published var capturedImageCount: Int = 0
     @Published var animateCameraViewShrinking = false
@@ -26,6 +28,7 @@ public class CameraViewModel: ObservableObject {
 
     public init(
         mode: CameraMode = .capture,
+        showCaptureAnimation: Bool = true,
         shouldShowScanOverlay: Bool = true,
         showDismissButton: Bool,
         showFlashButton: Bool,
@@ -34,6 +37,7 @@ public class CameraViewModel: ObservableObject {
         showCapturedImagesCount: Bool
     ) {
         self.mode = mode
+        self.showCaptureAnimation = showCaptureAnimation
         self.shouldShowScanOverlay = shouldShowScanOverlay
         self.showFlashButton = showFlashButton
         self.showTorchButton = showTorchButton
@@ -48,6 +52,8 @@ public class CameraViewModel: ObservableObject {
     
     func tappedCapture() {
         capturedImageCount += 1
+        guard showCaptureAnimation else { return }
+        
         withAnimation(.easeInOut(duration: 0.4)) {
             animateCameraViewShrinking = true
             makeCameraViewTranslucent = true

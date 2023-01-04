@@ -17,10 +17,12 @@ public struct Camera: View {
         showTorchButton: Bool = false,
         showPhotosPickerButton: Bool = false,
         showCapturedImagesCount: Bool = true,
+        showCaptureAnimation: Bool = false,
         imageHandler: ImageHandler? = nil
     ) {
         self.imageHandler = imageHandler
         let cameraViewModel = CameraViewModel(
+            showCaptureAnimation: showCaptureAnimation,
             showDismissButton: showDismissButton,
             showFlashButton: showFlashButton,
             showTorchButton: showTorchButton,
