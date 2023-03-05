@@ -7,7 +7,7 @@ public struct BaseCamera: View {
     let didReceiveCapturedImage = NotificationCenter.default.publisher(for: .didCaptureImage)
     let couldNotCaptureImage = NotificationCenter.default.publisher(for: .didNotCaptureImage)
 
-    @EnvironmentObject var cameraViewModel: CameraViewModel
+    @EnvironmentObject var cameraModel: CameraModel
     var imageHandler: ImageHandler?
     let codeHandler: CodeHandler?
     let sampleBufferHandler: SampleBufferHandler?
@@ -28,33 +28,33 @@ public struct BaseCamera: View {
                 .edgesIgnoringSafeArea(.all)
             cameraView
                 .edgesIgnoringSafeArea(.all)
-            if cameraViewModel.mode == .scan {
-                if cameraViewModel.shouldShowScanOverlay {
+            if cameraModel.mode == .scan {
+                if cameraModel.shouldShowScanOverlay {
                     ScanOverlay()
                 }
             } else {
                 CaptureOverlay()
-                    .environmentObject(cameraViewModel)
+                    .environmentObject(cameraModel)
             }
-            if cameraViewModel.showFlashButton {
+            if cameraModel.showFlashButton {
                 FlashOverlay()
-                    .environmentObject(cameraViewModel)
+                    .environmentObject(cameraModel)
             }
-            if cameraViewModel.showTorchButton {
+            if cameraModel.showTorchButton {
                 TorchOverlay()
-                    .environmentObject(cameraViewModel)
+                    .environmentObject(cameraModel)
             }
-            if cameraViewModel.showCapturedImagesCount {
+            if cameraModel.showCapturedImagesCount {
                 CapturedPhotosOverlay()
-                    .environmentObject(cameraViewModel)
+                    .environmentObject(cameraModel)
             }
-            if cameraViewModel.showPhotoPickerButton {
+            if cameraModel.showPhotoPickerButton {
                 PhotoPickerOverlay()
-                    .environmentObject(cameraViewModel)
+                    .environmentObject(cameraModel)
             }
-            if cameraViewModel.showDismissButton {
+            if cameraModel.showDismissButton {
                 DismissButtonOverlay()
-                    .environmentObject(cameraViewModel)
+                    .environmentObject(cameraModel)
             }
 
         }
@@ -64,16 +64,16 @@ public struct BaseCamera: View {
     
     var cameraView: some View {
         CameraView(
-            config: $cameraViewModel.config,
+            config: $cameraModel.config,
             codeTypes: codeTypes,
             simulatedData: "Simulated\nDATA",
             codeHandler: codeHandler,
             sampleBufferHandler: sampleBufferHandler
         )
-        .scaleEffect(cameraViewModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
-        .padding(.bottom, cameraViewModel.animateCameraViewShrinking ? 15 : 0)
-        .padding(.trailing, cameraViewModel.animateCameraViewShrinking ? 15 : 0)
-        .opacity(cameraViewModel.makeCameraViewTranslucent ? 0 : 1)
+        .scaleEffect(cameraModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
+        .padding(.bottom, cameraModel.animateCameraViewShrinking ? 15 : 0)
+        .padding(.trailing, cameraModel.animateCameraViewShrinking ? 15 : 0)
+        .opacity(cameraModel.makeCameraViewTranslucent ? 0 : 1)
     }
     
     func didReceiveCapturedImage(notification: Notification) {

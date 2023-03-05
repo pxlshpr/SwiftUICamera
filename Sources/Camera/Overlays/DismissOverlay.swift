@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct DismissButtonOverlay: View {
     
-    @EnvironmentObject var cameraViewModel: CameraViewModel
+    @EnvironmentObject var cameraModel: CameraModel
     
     var body: some View {
         VStack {
@@ -19,7 +19,7 @@ struct DismissButtonOverlay: View {
     var button: some View {
         Button {
             Haptics.feedback(style: .soft)
-            cameraViewModel.tappedDismiss()
+            cameraModel.tappedDismiss()
         } label: {
             CameraButtonLabel(
                 systemImage: .constant("chevron.down"),

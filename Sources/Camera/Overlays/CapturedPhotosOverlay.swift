@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct CapturedPhotosOverlay: View {
     
-    @EnvironmentObject var cameraViewModel: CameraViewModel
+    @EnvironmentObject var cameraModel: CameraModel
     
     var body: some View {
         VStack {
@@ -18,11 +18,11 @@ struct CapturedPhotosOverlay: View {
     
     @ViewBuilder
     var button: some View {
-        if cameraViewModel.capturedImageCount > 0 {
+        if cameraModel.capturedImageCount > 0 {
             Button {
-                cameraViewModel.tappedCapturedPhotos()
+                cameraModel.tappedCapturedPhotos()
             } label: {
-                Image(systemName: "\(cameraViewModel.capturedImageCount).circle.fill")
+                Image(systemName: "\(cameraModel.capturedImageCount).circle.fill")
                     .symbolRenderingMode(.palette)
 //                    .foregroundStyle(Color.black, Color(.systemGroupedBackground))
 //                    .opacity(0.6)

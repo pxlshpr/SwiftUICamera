@@ -9,15 +9,15 @@ public typealias RecognizedBarcodesAndImageHandler = ([RecognizedBarcode], UIIma
 public struct BarcodeScanner: View {
     
     @Environment(\.dismiss) var dismiss
-    @StateObject var cameraViewModel: CameraViewModel
-    @StateObject var viewModel: BarcodeScannerViewModel
+    @StateObject var cameraModel: CameraModel
+    @StateObject var model: BarcodeScannerModel
 
     public init(
         showDismissButton: Bool = true,
         showTorchButton: Bool = true,
         barcodesAndImageHandler: @escaping RecognizedBarcodesAndImageHandler
     ) {
-        let cameraViewModel = CameraViewModel(
+        let cameraModel = CameraModel(
             mode: .scan,
             showDismissButton: showDismissButton,
             showFlashButton: false,
@@ -25,9 +25,9 @@ public struct BarcodeScanner: View {
             showPhotoPickerButton: false,
             showCapturedImagesCount: false
         )
-        _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
-        let viewModel = BarcodeScannerViewModel(barcodesAndImageHandler: barcodesAndImageHandler)
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _cameraModel = StateObject(wrappedValue: cameraModel)
+        let model = BarcodeScannerModel(barcodesAndImageHandler: barcodesAndImageHandler)
+        _model = StateObject(wrappedValue: model)
     }
 
     public init(
@@ -35,7 +35,7 @@ public struct BarcodeScanner: View {
         showTorchButton: Bool = true,
         barcodesHandler: @escaping RecognizedBarcodesHandler
     ) {
-        let cameraViewModel = CameraViewModel(
+        let cameraModel = CameraModel(
             mode: .scan,
             showDismissButton: showDismissButton,
             showFlashButton: false,
@@ -43,20 +43,20 @@ public struct BarcodeScanner: View {
             showPhotoPickerButton: false,
             showCapturedImagesCount: false
         )
-        _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
-        let viewModel = BarcodeScannerViewModel(barcodesHandler: barcodesHandler)
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _cameraModel = StateObject(wrappedValue: cameraModel)
+        let model = BarcodeScannerModel(barcodesHandler: barcodesHandler)
+        _model = StateObject(wrappedValue: model)
     }
 
     public var body: some View {
-        BaseCamera(sampleBufferHandler: viewModel.processSampleBuffer)
-            .environmentObject(cameraViewModel)
-            .onChange(of: viewModel.shouldDismiss) { newShouldDismiss in
+        BaseCamera(sampleBufferHandler: model.processSampleBuffer)
+            .environmentObject(cameraModel)
+            .onChange(of: model.shouldDismiss) { newShouldDismiss in
                 if newShouldDismiss {
                     dismiss()
                 }
             }
-            .onChange(of: cameraViewModel.shouldDismiss) { newShouldDismiss in
+            .onChange(of: cameraModel.shouldDismiss) { newShouldDismiss in
                 if newShouldDismiss {
                     dismiss()
                 }
@@ -64,7 +64,7 @@ public struct BarcodeScanner: View {
     }
 }
 
-class BarcodeScannerViewModel: ObservableObject {
+class BarcodeScannerModel: ObservableObject {
     
     let barcodesHandler: RecognizedBarcodesHandler?
     let barcodesAndImageHandler: RecognizedBarcodesAndImageHandler?

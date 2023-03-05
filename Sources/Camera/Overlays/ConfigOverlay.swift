@@ -4,7 +4,7 @@ import AVKit
 
 struct ConfigOverlay: View {
     
-    @EnvironmentObject var cameraViewModel: CameraViewModel
+    @EnvironmentObject var cameraModel: CameraModel
     
     var body: some View {
         VStack {
@@ -34,9 +34,9 @@ struct ConfigOverlay: View {
         Menu {
             ForEach(deviceTypes, id: \.self) { deviceType in
                 Button {
-                    cameraViewModel.config.deviceType = deviceType
+                    cameraModel.config.deviceType = deviceType
                 } label: {
-                    if cameraViewModel.config.deviceType == deviceType {
+                    if cameraModel.config.deviceType == deviceType {
                         Label(deviceType.description, systemImage: "checkmark")
                     } else {
                         Text(deviceType.description)
@@ -46,9 +46,9 @@ struct ConfigOverlay: View {
             Divider()
             ForEach([AVCaptureDevice.Position.back, AVCaptureDevice.Position.front], id: \.self) { position in
                 Button {
-                    cameraViewModel.config.position = position
+                    cameraModel.config.position = position
                 } label: {
-                    if cameraViewModel.config.position == position {
+                    if cameraModel.config.position == position {
                         Label(position == .front ? "Front" : "Back", systemImage: "checkmark")
                     } else {
                         Text(position == .front ? "Front" : "Back")

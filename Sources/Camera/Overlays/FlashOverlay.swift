@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct FlashOverlay: View {
     
-    @EnvironmentObject var cameraViewModel: CameraViewModel
+    @EnvironmentObject var cameraModel: CameraModel
     
     var body: some View {
         VStack {
@@ -21,26 +21,26 @@ struct FlashOverlay: View {
             Button("On") {
                 Haptics.feedback(style: .medium)
                 withAnimation {
-                    cameraViewModel.config.flashMode = .on
+                    cameraModel.config.flashMode = .on
                 }
             }
             Button("Off") {
                 Haptics.feedback(style: .medium)
                 withAnimation {
-                    cameraViewModel.config.flashMode = .off
+                    cameraModel.config.flashMode = .off
                 }
             }
             Button("Auto") {
                 Haptics.feedback(style: .medium)
                 withAnimation {
-                    cameraViewModel.config.flashMode = .auto
+                    cameraModel.config.flashMode = .auto
                 }
             }
         } label: {
             CameraButtonLabel(
-                systemImage: $cameraViewModel.config.flashMode.systemImage,
-                backgroundColor: $cameraViewModel.config.flashMode.backgroundColor,
-                isSelected: $cameraViewModel.config.flashMode.isSelected)
+                systemImage: $cameraModel.config.flashMode.systemImage,
+                backgroundColor: $cameraModel.config.flashMode.backgroundColor,
+                isSelected: $cameraModel.config.flashMode.isSelected)
             
             .padding(.top, 20)
             .padding(.leading, 9)
@@ -49,7 +49,7 @@ struct FlashOverlay: View {
             .background(Color.clear)
             .contentShape(Rectangle())
         } primaryAction: {
-            cameraViewModel.tappedFlashButton()
+            cameraModel.tappedFlashButton()
         }
     }
 }

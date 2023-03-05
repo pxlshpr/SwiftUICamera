@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct CaptureOverlay: View {
     
-    @EnvironmentObject var cameraViewModel: CameraViewModel
+    @EnvironmentObject var cameraModel: CameraModel
     
     var body: some View {
         VStack {
@@ -16,7 +16,7 @@ struct CaptureOverlay: View {
     var captureButton: some View {
         Button {
             Haptics.feedback(style: .rigid)
-            cameraViewModel.tappedCapture()
+            cameraModel.tappedCapture()
 
             NotificationCenter.default.post(name: Notification.Name("didTapCaptureButton"), object: nil)
         } label: {

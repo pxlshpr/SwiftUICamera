@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct CodeScanner: View {
-    @StateObject var cameraViewModel: CameraViewModel
+    @StateObject var cameraModel: CameraModel
     let codeHandler: CodeHandler?
 
     public init(
@@ -10,7 +10,7 @@ public struct CodeScanner: View {
         codeHandler: CodeHandler? = nil
     ) {
         self.codeHandler = codeHandler
-        let cameraViewModel = CameraViewModel(
+        let cameraModel = CameraModel(
             mode: .scan,
             showDismissButton: showDismissButton,
             showFlashButton: false,
@@ -18,11 +18,11 @@ public struct CodeScanner: View {
             showPhotoPickerButton: false,
             showCapturedImagesCount: false
         )
-        _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
+        _cameraModel = StateObject(wrappedValue: cameraModel)
     }
     
     public var body: some View {
         BaseCamera(codeHandler: codeHandler)
-            .environmentObject(cameraViewModel)
+            .environmentObject(cameraModel)
     }
 }

@@ -7,7 +7,7 @@ public enum CameraMode {
     case scan
 }
 
-public class CameraViewModel: ObservableObject {
+public class CameraModel: ObservableObject {
     let mode: CameraMode
     let showDismissButton: Bool
     let showFlashButton: Bool

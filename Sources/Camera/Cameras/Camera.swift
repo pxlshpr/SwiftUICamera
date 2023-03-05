@@ -8,7 +8,7 @@ public typealias ImageHandler = ((UIImage) -> Void)
 public struct Camera: View {
     
     @Environment(\.dismiss) var dismiss
-    @StateObject var cameraViewModel: CameraViewModel
+    @StateObject var cameraModel: CameraModel
     let imageHandler: ImageHandler?
     
     public init(
@@ -21,7 +21,7 @@ public struct Camera: View {
         imageHandler: ImageHandler? = nil
     ) {
         self.imageHandler = imageHandler
-        let cameraViewModel = CameraViewModel(
+        let cameraModel = CameraModel(
             showCaptureAnimation: showCaptureAnimation,
             showDismissButton: showDismissButton,
             showFlashButton: showFlashButton,
@@ -29,13 +29,13 @@ public struct Camera: View {
             showPhotoPickerButton: showPhotosPickerButton,
             showCapturedImagesCount: showCapturedImagesCount
         )
-        _cameraViewModel = StateObject(wrappedValue: cameraViewModel)
+        _cameraModel = StateObject(wrappedValue: cameraModel)
     }
     
     public var body: some View {
         BaseCamera(imageHandler: imageHandler)
-            .environmentObject(cameraViewModel)
-            .onChange(of: cameraViewModel.shouldDismiss) { newValue in
+            .environmentObject(cameraModel)
+            .onChange(of: cameraModel.shouldDismiss) { newValue in
                 if newValue {
                     dismiss()
                 }
