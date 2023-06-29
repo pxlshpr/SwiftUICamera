@@ -1,13 +1,10 @@
 import SwiftUI
 import AVKit
+import Observation
+
 import SwiftHaptics
 
-public enum CameraMode {
-    case capture
-    case scan
-}
-
-public class CameraModel: ObservableObject {
+@Observable public class CameraModel {
     let mode: CameraMode
     let showDismissButton: Bool
     let showFlashButton: Bool
@@ -17,14 +14,14 @@ public class CameraModel: ObservableObject {
     
     let showCaptureAnimation: Bool
 
-    @Published var capturedImageCount: Int = 0
-    @Published var animateCameraViewShrinking = false
-    @Published var makeCameraViewTranslucent = false
+    var capturedImageCount: Int = 0
+    var animateCameraViewShrinking = false
+    var makeCameraViewTranslucent = false
     
-    @Published var config: CameraConfiguration = CameraConfiguration()
+    var config: CameraConfiguration = CameraConfiguration()
     
-    @Published public var shouldDismiss: Bool = false
-    @Published public var shouldShowScanOverlay: Bool
+    public var shouldDismiss: Bool = false
+    public var shouldShowScanOverlay: Bool = false
 
     public init(
         mode: CameraMode = .capture,
@@ -38,12 +35,13 @@ public class CameraModel: ObservableObject {
     ) {
         self.mode = mode
         self.showCaptureAnimation = showCaptureAnimation
-        self.shouldShowScanOverlay = shouldShowScanOverlay
         self.showFlashButton = showFlashButton
         self.showTorchButton = showTorchButton
         self.showPhotoPickerButton = showPhotoPickerButton
         self.showCapturedImagesCount = showCapturedImagesCount
+        
         self.showDismissButton = showDismissButton
+        self.shouldShowScanOverlay = shouldShowScanOverlay
     }
     
     func tappedDismiss() {

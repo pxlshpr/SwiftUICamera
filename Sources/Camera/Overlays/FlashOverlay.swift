@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct FlashOverlay: View {
     
-    @EnvironmentObject var cameraModel: CameraModel
+    @Bindable var cameraModel: CameraModel
     
     var body: some View {
         VStack {

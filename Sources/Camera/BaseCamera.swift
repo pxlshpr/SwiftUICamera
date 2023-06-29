@@ -7,16 +7,19 @@ public struct BaseCamera: View {
     let didReceiveCapturedImage = NotificationCenter.default.publisher(for: .didCaptureImage)
     let couldNotCaptureImage = NotificationCenter.default.publisher(for: .didNotCaptureImage)
 
-    @EnvironmentObject var cameraModel: CameraModel
+    @Bindable var cameraModel: CameraModel
+
     var imageHandler: ImageHandler?
     let codeHandler: CodeHandler?
     let sampleBufferHandler: SampleBufferHandler?
 
     public init(
+        cameraModel: CameraModel,
         imageHandler: ImageHandler? = nil,
         codeHandler: CodeHandler? = nil,
         sampleBufferHandler: SampleBufferHandler? = nil
     ) {
+        self.cameraModel = cameraModel
         self.imageHandler = imageHandler
         self.codeHandler = codeHandler
         self.sampleBufferHandler = sampleBufferHandler
@@ -56,27 +59,24 @@ public struct BaseCamera: View {
                 }
             } else {
                 CaptureOverlay()
-                    .environmentObject(cameraModel)
             }
             if cameraModel.showFlashButton {
-                FlashOverlay()
-                    .environmentObject(cameraModel)
+                FlashOverlay(cameraModel: cameraModel)
             }
             if cameraModel.showTorchButton {
-                TorchOverlay()
-                    .environmentObject(cameraModel)
+                TorchOverlay(cameraModel: cameraModel)
             }
             if cameraModel.showCapturedImagesCount {
                 CapturedPhotosOverlay()
-                    .environmentObject(cameraModel)
+                    .environment(cameraModel)
             }
             if cameraModel.showPhotoPickerButton {
                 PhotoPickerOverlay()
-                    .environmentObject(cameraModel)
+                    .environment(cameraModel)
             }
             if cameraModel.showDismissButton {
                 DismissButtonOverlay()
-                    .environmentObject(cameraModel)
+                    .environment(cameraModel)
             }
         }
     }

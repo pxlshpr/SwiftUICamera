@@ -3,7 +3,7 @@ import SwiftHaptics
 
 struct PhotoPickerOverlay: View {
     
-    @EnvironmentObject var cameraModel: CameraModel
+    @Environment(CameraModel.self) var cameraModel: CameraModel
     
     var body: some View {
         VStack {
