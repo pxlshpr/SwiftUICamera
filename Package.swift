@@ -15,10 +15,9 @@ let package = Package(
             targets: ["Camera"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.3"),
-        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.320"),
-        .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.75"),
+        .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.4"),
+        .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.97"),
+        .package(url: "https://github.com/pxlshpr/VisionSugar", from: "0.0.80"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -26,9 +25,9 @@ let package = Package(
         .target(
             name: "Camera",
             dependencies: [
-                .product(name: "SwiftHaptics", package: "swifthaptics"),
-                .product(name: "SwiftUISugar", package: "swiftuisugar"),
-                .product(name: "VisionSugar", package: "visionsugar"),
+                .product(name: "SwiftHaptics", package: "SwiftHaptics"),
+                .product(name: "SwiftSugar", package: "SwiftSugar"),
+                .product(name: "VisionSugar", package: "VisionSugar"),
             ]),
         .testTarget(
             name: "CameraTests",

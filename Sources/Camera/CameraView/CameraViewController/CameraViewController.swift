@@ -1,6 +1,6 @@
 import AVFoundation
 import SwiftUI
-import SwiftUISugar
+//import SwiftUISugar
 
 let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
 
@@ -217,7 +217,7 @@ extension CameraView.CameraViewController {
     func setupView() {
         view.backgroundColor = UIColor.black
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
         previewLayer?.frame = view.layer.bounds
         previewLayer?.connection?.videoOrientation = .portrait
         view.layer.addSublayer(previewLayer!)
@@ -270,10 +270,10 @@ extension CameraView.CameraViewController {
     }
 
     @objc func updateOrientation() {
-        guard let orientation =
-                keyWindow?.windowScene?.interfaceOrientation else {
-            return
-        }
+//        guard let orientation = keyWindow?.windowScene?.interfaceOrientation else {
+//            return
+//        }
+        let orientation = UIInterfaceOrientation.landscapeLeft
         let previewConnection = captureSession.connections[1]
         previewConnection.videoOrientation = AVCaptureVideoOrientation(rawValue: orientation.rawValue) ?? .portrait
     }

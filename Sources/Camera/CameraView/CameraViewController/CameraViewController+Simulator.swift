@@ -1,6 +1,5 @@
 import AVFoundation
 import SwiftUI
-import SwiftUISugar
 
 #if targetEnvironment(simulator)
 extension CameraView {

@@ -28,6 +28,28 @@ public struct BaseCamera: View {
                 .edgesIgnoringSafeArea(.all)
             cameraView
                 .edgesIgnoringSafeArea(.all)
+            accessoryElements
+        }
+        .onReceive(didReceiveCapturedImage, perform: didReceiveCapturedImage)
+        .onReceive(couldNotCaptureImage, perform: couldNotCaptureImage)
+    }
+    
+    var cameraView: some View {
+        CameraView(
+            config: $cameraModel.config,
+            codeTypes: codeTypes,
+            simulatedData: "Simulated\nDATA",
+            codeHandler: codeHandler,
+            sampleBufferHandler: sampleBufferHandler
+        )
+        .scaleEffect(cameraModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
+        .padding(.bottom, cameraModel.animateCameraViewShrinking ? 15 : 0)
+        .padding(.trailing, cameraModel.animateCameraViewShrinking ? 15 : 0)
+        .opacity(cameraModel.makeCameraViewTranslucent ? 0 : 1)
+    }
+    
+    var accessoryElements: some View {
+        Group {
             if cameraModel.mode == .scan {
                 if cameraModel.shouldShowScanOverlay {
                     ScanOverlay()
@@ -56,26 +78,8 @@ public struct BaseCamera: View {
                 DismissButtonOverlay()
                     .environmentObject(cameraModel)
             }
-
         }
-        .onReceive(didReceiveCapturedImage, perform: didReceiveCapturedImage)
-        .onReceive(couldNotCaptureImage, perform: couldNotCaptureImage)
     }
-    
-    var cameraView: some View {
-        CameraView(
-            config: $cameraModel.config,
-            codeTypes: codeTypes,
-            simulatedData: "Simulated\nDATA",
-            codeHandler: codeHandler,
-            sampleBufferHandler: sampleBufferHandler
-        )
-        .scaleEffect(cameraModel.animateCameraViewShrinking ? 0.01 : 1, anchor: .bottomTrailing)
-        .padding(.bottom, cameraModel.animateCameraViewShrinking ? 15 : 0)
-        .padding(.trailing, cameraModel.animateCameraViewShrinking ? 15 : 0)
-        .opacity(cameraModel.makeCameraViewTranslucent ? 0 : 1)
-    }
-    
     func didReceiveCapturedImage(notification: Notification) {
         guard let image = notification.userInfo?[Notification.CameraImagePickerKeys.image] as? UIImage else {
             return

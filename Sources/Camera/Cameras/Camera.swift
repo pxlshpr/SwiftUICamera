@@ -16,7 +16,7 @@ public struct Camera: View {
         showFlashButton: Bool = true,
         showTorchButton: Bool = false,
         showPhotosPickerButton: Bool = false,
-        showCapturedImagesCount: Bool = true,
+        showCapturedImagesCount: Bool = false,
         showCaptureAnimation: Bool = false,
         imageHandler: ImageHandler? = nil
     ) {

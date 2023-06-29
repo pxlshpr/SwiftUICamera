@@ -1,6 +1,5 @@
 import AVFoundation
 import SwiftUI
-import SwiftUISugar
 
 public typealias SampleBufferHandler = (CMSampleBuffer) -> ()
 

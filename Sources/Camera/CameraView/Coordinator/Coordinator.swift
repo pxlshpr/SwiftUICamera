@@ -1,6 +1,5 @@
 import AVFoundation
 import SwiftUI
-import SwiftUISugar
 
 extension CameraView {
     public class Coordinator: NSObject {

@@ -1,6 +1,5 @@
 import AVFoundation
 import SwiftUI
-import SwiftUISugar
 import SwiftHaptics
 
 extension CameraView.Coordinator: AVCaptureMetadataOutputObjectsDelegate {

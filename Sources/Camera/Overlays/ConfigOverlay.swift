@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftHaptics
 import AVKit
+import SwiftSugar
 
 struct ConfigOverlay: View {
     
