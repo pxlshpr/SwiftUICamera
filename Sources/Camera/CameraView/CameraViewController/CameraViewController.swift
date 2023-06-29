@@ -119,7 +119,11 @@ extension CameraView.CameraViewController {
 
     func device(for config: CameraConfiguration) -> AVCaptureDevice? {
 //        AVCaptureDevice.default(for: .video)
-        AVCaptureDevice.default(config.deviceType, for: .video, position: config.position) ?? .defaultCamera
+        AVCaptureDevice.default(
+            config.deviceType,
+            for: .video,
+            position: config.position
+        ) ?? .defaultCamera
     }
     
     func input(for device: AVCaptureDevice) throws -> AVCaptureDeviceInput {
