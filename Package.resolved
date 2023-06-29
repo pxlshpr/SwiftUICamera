@@ -1,21 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "activityindicatorview",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/exyte/ActivityIndicatorView",
-      "state" : {
-        "revision" : "9970fd0bb7a05dad0b6566ae1f56937716686b24",
-        "version" : "1.1.1"
-      }
-    },
-    {
       "identity" : "swifthaptics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftHaptics",
       "state" : {
-        "revision" : "c3069ce1390e5562b2d2c0e4ffed5a1b4e9aba54",
-        "version" : "0.1.3"
+        "revision" : "045e42a7650744361da92943474b09ba7bbaa39b",
+        "version" : "0.1.4"
       }
     },
     {
@@ -23,26 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftSugar",
       "state" : {
-        "revision" : "06f08db0baa5f0f2dd650dfa35a740c91fae671e",
-        "version" : "0.0.88"
-      }
-    },
-    {
-      "identity" : "swiftui-introspect",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/siteline/SwiftUI-Introspect",
-      "state" : {
-        "revision" : "c18951c747ab62af7c15e17a81bd37d4fd5a9979",
-        "version" : "0.2.3"
-      }
-    },
-    {
-      "identity" : "swiftuisugar",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pxlshpr/SwiftUISugar",
-      "state" : {
-        "revision" : "58feaf329ba01838d9e6d739c6af7b409b15c66f",
-        "version" : "0.0.371"
+        "revision" : "1a03a2ca2ea9c0f459e0870c25e8470556bbc842",
+        "version" : "0.0.97"
       }
     },
     {
@@ -50,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/VisionSugar",
       "state" : {
-        "revision" : "badb046c757441e1523b1a7b04b37a4fb8827438",
-        "version" : "0.0.78"
+        "revision" : "603c843e2482d44233259a4eb38012114c859054",
+        "version" : "0.0.80"
       }
     }
   ],
