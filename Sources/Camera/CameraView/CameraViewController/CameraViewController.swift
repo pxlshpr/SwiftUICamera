@@ -231,7 +231,6 @@ extension CameraView.CameraViewController {
         previewLayer?.connection?.videoRotationAngle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
 
         view.layer.addSublayer(previewLayer!)
-//        updateOrientation()
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
         view.addGestureRecognizer(tapGestureRecognizer)
