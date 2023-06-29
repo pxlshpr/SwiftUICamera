@@ -26,8 +26,9 @@ import SwiftHaptics
         /// Check this flag before processing the sample buffer
         guard !didCallHandler else { return }
 
-        Task {
+        Task { [weak sampleBuffer] in
 
+            guard let sampleBuffer else { return }
             let barcodes = try await sampleBuffer.recognizedBarcodes()
             guard !barcodes.isEmpty else { return }
 

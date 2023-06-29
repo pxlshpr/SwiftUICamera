@@ -1,6 +1,10 @@
 import SwiftUI
 import AVKit
+import OSLog
+
 import SwiftHaptics
+
+let baseCameraLogger = Logger(subsystem: "Camer", category: "BaseCamera")
 
 public struct BaseCamera: View {
 
@@ -59,6 +63,7 @@ public struct BaseCamera: View {
                 }
             } else {
                 CaptureOverlay()
+                    .environment(cameraModel)
             }
             if cameraModel.showFlashButton {
                 FlashOverlay(cameraModel: cameraModel)
@@ -100,7 +105,7 @@ public struct BaseCamera: View {
         guard let error = notification.userInfo?[Notification.CameraImagePickerKeys.error] as? Error else {
             return
         }
-        print(error.localizedDescription)
+        baseCameraLogger.error("Error: \(error.localizedDescription, privacy: .public)")
     }
 }
 

@@ -36,7 +36,7 @@ public struct Camera: View {
             cameraModel: cameraModel,
             imageHandler: imageHandler
         )
-        .onChange(of: cameraModel.shouldDismiss) { newValue in
+        .onChange(of: cameraModel.shouldDismiss) { oldValue, newValue in
             if newValue {
                 dismiss()
             }

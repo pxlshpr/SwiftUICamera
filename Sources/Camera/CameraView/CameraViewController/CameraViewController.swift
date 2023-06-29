@@ -1,8 +1,10 @@
 import AVFoundation
 import SwiftUI
 //import SwiftUISugar
+import OSLog
 
 let codeTypes: [AVMetadataObject.ObjectType] = [.upce, .code39, .code39Mod43, .ean13, .ean8, .code93, .code128, .pdf417, .qr, .aztec]
+let cameraViewLogger = Logger(subsystem: "Camera", category: "CameraView")
 
 #if !targetEnvironment(simulator)
 extension CameraView {
@@ -17,6 +19,8 @@ extension CameraView {
         var videoOutput = AVCaptureVideoDataOutput()
         var metadataOutput = AVCaptureMetadataOutput()
         
+        var rotationCoordinator: AVCaptureDevice.RotationCoordinator? = nil
+
         init(config: CameraConfiguration, delegate: Coordinator? = nil) {
             self.config = config
             self.delegate = delegate
@@ -70,7 +74,7 @@ extension CameraView.CameraViewController {
         do {
             try setupCaptureSession(for: config)
         } catch {
-            print(error)
+            cameraViewLogger.error("Error: \(error, privacy: .public)")
         }
         setupView()
         startCaptureSession()
@@ -81,7 +85,13 @@ extension CameraView.CameraViewController {
         guard let delegate else { return }
         captureSession = AVCaptureSession()
         
-        let input = try input(for: config)
+        guard let device = device(for: config) else {
+            throw CameraError.couldNotCreateDevice
+        }
+        
+        rotationCoordinator = .init(device: device, previewLayer: previewLayer)
+        
+        let input = try input(for: device)
         captureSession.addInput(input)
         
         if isSampling {
@@ -112,12 +122,7 @@ extension CameraView.CameraViewController {
         AVCaptureDevice.default(config.deviceType, for: .video, position: config.position) ?? .defaultCamera
     }
     
-    func input(for config: CameraConfiguration) throws -> AVCaptureDeviceInput {
-        guard let device = device(for: config) else {
-//        guard let device = AVCaptureDevice.default(for: .video) else {
-            throw CameraError.couldNotCreateDevice
-        }
-        
+    func input(for device: AVCaptureDevice) throws -> AVCaptureDeviceInput {
         if device.isFocusModeSupported(.autoFocus) {
             try! device.lockForConfiguration()
             device.focusMode = .autoFocus
@@ -219,9 +224,13 @@ extension CameraView.CameraViewController {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
         previewLayer?.frame = view.layer.bounds
-        previewLayer?.connection?.videoOrientation = .portrait
+        
+        guard let rotationCoordinator else {
+            return
+        }
+        previewLayer?.connection?.videoRotationAngle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
+
         view.layer.addSublayer(previewLayer!)
-        //TODO: Is this needed?
 //        updateOrientation()
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
@@ -241,7 +250,7 @@ extension CameraView.CameraViewController {
             device.torchMode = torchMode
             device.unlockForConfiguration()
         } catch {
-            print(error)
+            cameraViewLogger.error("Error: \(error, privacy: .public)")
         }
     }
 
@@ -270,12 +279,12 @@ extension CameraView.CameraViewController {
     }
 
     @objc func updateOrientation() {
-//        guard let orientation = keyWindow?.windowScene?.interfaceOrientation else {
-//            return
-//        }
-        let orientation = UIInterfaceOrientation.landscapeLeft
         let previewConnection = captureSession.connections[1]
-        previewConnection.videoOrientation = AVCaptureVideoOrientation(rawValue: orientation.rawValue) ?? .portrait
+        guard let rotationCoordinator else {
+            return
+        }
+        previewConnection.videoRotationAngle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
+
     }
     
     override public var prefersStatusBarHidden: Bool {

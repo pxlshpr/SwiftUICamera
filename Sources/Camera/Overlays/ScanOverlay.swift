@@ -1,6 +1,9 @@
 import SwiftUI
 import SwiftHaptics
 import AVKit
+import OSLog
+
+let scanOverlayLogger = Logger(subsystem: "Camera", category: "ScanOverlay")
 
 struct ScanOverlay: View {
     
@@ -99,10 +102,10 @@ struct ScanOverlay: View {
                 
                 device.unlockForConfiguration()
             } catch {
-                print("Torch could not be used")
+                scanOverlayLogger.error("Torch could not be used")
             }
         } else {
-            print("Torch is not available")
+            scanOverlayLogger.debug("Torch is not available")
         }
     }
 }

@@ -14,7 +14,7 @@ extension CameraView.Coordinator: AVCapturePhotoCaptureDelegate {
         switch result {
         case .success(let photo):
             guard let data = photo.fileDataRepresentation() else {
-                print("Error: no image data found")
+                cameraViewLogger.error("Error: no image data found")
                 return
             }
 
@@ -31,7 +31,7 @@ extension CameraView.Coordinator: AVCapturePhotoCaptureDelegate {
 //                    dismiss()
 //                }
         case .failure(let error):
-            print(error.localizedDescription)
+            cameraViewLogger.error("Error: \(error.localizedDescription, privacy: .public)")
             let userInfo = [
                 Notification.CameraImagePickerKeys.error: error,
             ]
