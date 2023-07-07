@@ -42,12 +42,16 @@ extension CameraView.CameraViewController {
     
     override public func viewWillLayoutSubviews() {
         previewLayer?.frame = view.layer.bounds
-        setVideoRotation(for: UIDevice.current.orientation.interfaceOrientation)
+//        setVideoRotation(for: UIDevice.current.orientation.interfaceOrientation)
     }
 
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        setVideoRotation(for: UIDevice.current.orientation.interfaceOrientation)
+        
+        setVideoRotation(for: UIWindow.orientation)
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+//            self.setVideoRotation(for: UIDevice.current.orientation.interfaceOrientation)
+//        }
         DispatchQueue.global(qos: .background).async {
             self.captureSession.startRunning()
         }
@@ -301,15 +305,16 @@ extension CameraView.CameraViewController {
 //        print("viewWillTransition to: \(size)")
 //    }
 //    public override func didRotate(from orientation: UIInterfaceOrientation) {
-//        print("didRotate to: \(orientation.rawValue)")
-//    }
-//    public override func willRotate(to orientation: UIInterfaceOrientation, duration: TimeInterval) {
 //        setVideoRotation(for: orientation)
 //    }
     
+    public override func willRotate(to orientation: UIInterfaceOrientation, duration: TimeInterval) {
+        setVideoRotation(for: orientation)
+    }
+    
     func setVideoRotation(for orientation: UIInterfaceOrientation) {
+        print("Setting video rotation for: \(orientation)")
         captureSession.connections[1].videoRotationAngle = switch orientation {
-        case .portrait:             90
         case .portraitUpsideDown:   270
         case .landscapeLeft:        180
         case .landscapeRight:       0
@@ -336,6 +341,24 @@ extension UIDeviceOrientation {
         case .landscapeLeft:        .landscapeRight
         case .landscapeRight:       .landscapeLeft
         default:                    .portrait
+        }
+    }
+}
+
+extension UIWindow {
+    static var orientation: UIInterfaceOrientation {
+        if #available(iOS 13.0, *) {
+            
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene, windowScene.activationState == .foregroundActive, let window = windowScene.windows.first else { return .portrait }
+
+            return window.windowScene?.interfaceOrientation ?? .portrait
+            
+//            return UIApplication.shared.windows
+//                .first?
+//                .windowScene?
+//                .interfaceOrientation ?? .portrait
+        } else {
+            return UIApplication.shared.statusBarOrientation
         }
     }
 }
