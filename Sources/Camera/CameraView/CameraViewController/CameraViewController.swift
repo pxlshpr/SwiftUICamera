@@ -42,10 +42,12 @@ extension CameraView.CameraViewController {
     
     override public func viewWillLayoutSubviews() {
         previewLayer?.frame = view.layer.bounds
+        setVideoRotation(for: UIDevice.current.orientation.interfaceOrientation)
     }
 
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        setVideoRotation(for: UIDevice.current.orientation.interfaceOrientation)
         DispatchQueue.global(qos: .background).async {
             self.captureSession.startRunning()
         }
@@ -212,15 +214,19 @@ extension CameraView.CameraViewController {
     
     //MARK: - Helpers
     func addNotifications() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(didTapCaptureButton),
-                                               name: Notification.Name("didTapCaptureButton"),
-                                               object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(didTapCaptureButton),
+            name: Notification.Name("didTapCaptureButton"),
+            object: nil
+        )
 
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(updateOrientation),
-                                               name: Notification.Name("UIDeviceOrientationDidChangeNotification"),
-                                               object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateOrientation),
+            name: Notification.Name("UIDeviceOrientationDidChangeNotification"),
+            object: nil
+        )
     }
     
     func setupView() {
@@ -236,12 +242,12 @@ extension CameraView.CameraViewController {
 
         view.layer.addSublayer(previewLayer!)
 
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
-        view.addGestureRecognizer(tapGestureRecognizer)
+//        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
+//        view.addGestureRecognizer(tapGestureRecognizer)
     }
     
     @objc func didTapPreview(gesture: UITapGestureRecognizer) {
-        changeFocusMode(to: .autoFocus)
+//        changeFocusMode(to: .autoFocus)
     }
     
     func setDeviceTorchMode(to torchMode: AVCaptureDevice.TorchMode) {
@@ -282,12 +288,33 @@ extension CameraView.CameraViewController {
     }
 
     @objc func updateOrientation() {
-        let previewConnection = captureSession.connections[1]
-        guard let rotationCoordinator else {
-            return
+//        let previewConnection = captureSession.connections[1]
+//        guard let rotationCoordinator else {
+//            return
+//        }
+        
+//        previewConnection.videoRotationAngle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
+//        previewConnection.videoRotationAngle = rotationCoordinator.videoRotationAngleForHorizonLevelPreview
+    }
+    
+//    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+//        print("viewWillTransition to: \(size)")
+//    }
+//    public override func didRotate(from orientation: UIInterfaceOrientation) {
+//        print("didRotate to: \(orientation.rawValue)")
+//    }
+//    public override func willRotate(to orientation: UIInterfaceOrientation, duration: TimeInterval) {
+//        setVideoRotation(for: orientation)
+//    }
+    
+    func setVideoRotation(for orientation: UIInterfaceOrientation) {
+        captureSession.connections[1].videoRotationAngle = switch orientation {
+        case .portrait:             90
+        case .portraitUpsideDown:   270
+        case .landscapeLeft:        180
+        case .landscapeRight:       0
+        default:                    90
         }
-        previewConnection.videoRotationAngle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
-
     }
     
     override public var prefersStatusBarHidden: Bool {
@@ -300,3 +327,15 @@ extension CameraView.CameraViewController {
 }
 
 #endif
+
+extension UIDeviceOrientation {
+    var interfaceOrientation: UIInterfaceOrientation {
+        switch self {
+        case .portrait:             .portrait
+        case .portraitUpsideDown:   .portraitUpsideDown
+        case .landscapeLeft:        .landscapeRight
+        case .landscapeRight:       .landscapeLeft
+        default:                    .portrait
+        }
+    }
+}
