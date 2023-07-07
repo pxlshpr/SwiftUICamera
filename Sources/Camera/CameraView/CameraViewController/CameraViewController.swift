@@ -345,7 +345,7 @@ extension UIDeviceOrientation {
     }
 }
 
-extension UIWindow {
+public extension UIWindow {
     static var orientation: UIInterfaceOrientation {
         if #available(iOS 13.0, *) {
             
