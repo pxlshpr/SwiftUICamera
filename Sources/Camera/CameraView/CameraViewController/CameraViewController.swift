@@ -246,12 +246,12 @@ extension CameraView.CameraViewController {
 
         view.layer.addSublayer(previewLayer!)
 
-//        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
-//        view.addGestureRecognizer(tapGestureRecognizer)
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapPreview))
+        view.addGestureRecognizer(tapGestureRecognizer)
     }
     
     @objc func didTapPreview(gesture: UITapGestureRecognizer) {
-//        changeFocusMode(to: .autoFocus)
+        changeFocusMode(to: .autoFocus)
     }
     
     func setDeviceTorchMode(to torchMode: AVCaptureDevice.TorchMode) {
